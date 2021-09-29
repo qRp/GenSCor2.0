@@ -61,4 +61,3 @@ L = {"L_open": {'EN':"Open",'FR':"Ouvrir"},
     "Do you want to quit?":{'EN':"Do you want to quit?",'FR':"Voulez vous vraiment quitter ?"}
 }
 
-
