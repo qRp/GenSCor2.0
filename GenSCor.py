@@ -1,31 +1,17 @@
-import tkinter as tk
-from langage import L
+from tkinter import *
 
-#variables globales
-langue='EN'
+def fonction_vide():
+    x=0
 
-
-
-
-#Gestion fenetre tkinter
-window=tk.Tk()
-#paramètres de la fentre
-window.title("GenSCor")
-window.minsize(480,480)
-#ajout du logo
-img=tk.Image("photo", file="genscor.png")
-window.tk.call('wm', 'iconphoto', window, img)
+main_window=Tk()
+main_window.title('GenSCor')
+main_window.config(bg='#CEE5D0')
 
 
+menubar=Menu(main_window)
+filemenu=Menu(menubar, tearoff=0)
+filemenu.add_command(label="New", command=fonction_vide)
+menubar.add_cascade(label="File", menu=filemenu)
 
-
-
-
-
-
-
-
-
-
-#run fenetre principale
-window.mainloop()
+main_window.config(menu=menubar)
+main_window.mainloop()
