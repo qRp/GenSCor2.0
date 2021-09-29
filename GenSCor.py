@@ -1,6 +1,7 @@
 from tkinter import *
 from langage import *
 from Variant import *
+from Rules import *
 
 def fonction_vide():
     x=0
@@ -18,8 +19,11 @@ menubar.add_cascade(label="File", menu=filemenu)
 main_window.config(menu=menubar)
 #main_window.mainloop()
 
-test=Variant([1,2,3],10)
-print(test.get_Score())
-print(test.get_Attributs())
-test1=Variant()
-print(str(test1.get_Attributs())+"  "+str(test1.get_Score()))
+test=Rules("on",1,"+","Pathogenic","down",50)
+print(test.get_value())
+print(test.get_type())
+print(test.get_sens())
+print(test.get_operator())
+print(test.get_score_val())
+print(test.get_status())
+print(test.get_column())
