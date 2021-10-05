@@ -1,10 +1,16 @@
 class Rules:
     def __init__(self,status="on",column=[], operator=[], value=[], sens="up", score_val=0):
+        #status may be on or off : active or inactive
         self.status=status
+        #a list of index of variants.attributs
         self.column=column
+        #a list of operator
         self.operator=operator
+        #a list of value to compare variant.attriuts[index] to
         self.value=value
+        #may be up or down : the effect on the score
         self.sens=sens
+        # the value to add or substract to the score
         self.score_val=score_val
 
     def get_status(self):
@@ -42,3 +48,4 @@ class Rules:
 
     def set_value(self,value):
         self.value=value
+

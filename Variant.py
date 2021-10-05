@@ -1,5 +1,5 @@
 class Variant:
-    def __init__(self, attributs_list=[], score=2):
+    def __init__(self, attributs_list=[], score=0):
         self.Attributs=attributs_list
         self.Score=score
 
