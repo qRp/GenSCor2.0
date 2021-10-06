@@ -49,3 +49,32 @@ class Rules:
     def set_value(self,value):
         self.value=value
 
+    def convert_to_json(self):
+        size_list=len(self.get_column())
+        my_json='{"status": "'+self.get_status()+'","Column": ['
+        cpt=0
+        for i in self.get_column():
+            cpt+=1
+            my_json=my_json+'"'+str(i)+'"'
+            if cpt < size_list:
+                my_json=my_json+','
+            else :
+                my_json=my_json+'], "Operator": ['
+        cpt=0
+        for i in self.get_operator():
+            cpt+=1
+            my_json=my_json+'"'+str(i)+'"'
+            if cpt < size_list:
+                my_json=my_json+','
+            else :
+                my_json=my_json+'], "Value": ['
+        cpt=0
+        for i in self.get_value():
+            cpt+=1
+            my_json=my_json+'"'+str(i)+'"'
+            if cpt < size_list:
+                my_json=my_json+','
+            else :
+                my_json=my_json+'], "Sens":"'
+        my_json = my_json+self.get_sens()+'","Score_val": "'+str(self.get_score_val())+'"}'
+        return my_json

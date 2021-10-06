@@ -27,16 +27,11 @@ menubar.add_cascade(label="File", menu=filemenu)
 
 
 
-rule_test=Rules("on",[1],["="],["Pathogenic"],"up",50)
-
-#test sur les donnees du fichir data
-variants_list=[]
-f = open("data","r")
-lines = f.readlines()
-for line in lines:
-    data_line=line.split()
-    print(data_line)
-    variants_list.append(Variant(data_line))
+rule_test1=Rules("on",[1,2],["match",">="],["Pathogenic",50],"up",50)
+rule_test=Rules("on",[1,2],["match",">="],["Pathogenic",50],"up",50)
+print(rule_test1.convert_to_json())
+#test sur les donnees du fichier data
+variants_list=load_data("data")
 
 
 
@@ -44,7 +39,7 @@ for i in variants_list:
     score_it(rule_test, i)
     print(i.get_Attributs()[0],i.get_Score())
 
-
+export_data("test",variants_list)
 
 main_window.config(menu=menubar)
 #main_window.mainloop()
