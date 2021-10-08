@@ -1,45 +1,47 @@
+from tkinter.messagebox import *
 from tkinter import *
 from langage import *
 from Variant import *
 from Rules import *
 from function import *
+from Glob import *
 import re
+import json
 
-def fonction_vide():
-    x=0
+#create Menu
+menubar = Menu(main_window)
+filemenu = Menu(menubar, tearoff=0)
+filemenu.add_command(label="Load Rules", command=preload_rules)
+filemenu.add_command(label="Load Data", command=preload_data)
+filemenu.insert_separator(index=2)
+filemenu.add_command(label="Save Rules", command=prewrite_rules)
+filemenu.add_command(label="Export Data", command=preexport_data)
+filemenu.insert_separator(index=5)
+filemenu.add_command(label="Quit", command=tkinter.messagebox.askokcancel)
+menubar.add_cascade(label="File", menu=filemenu)
+main_window.config(menu=menubar)
 
-main_window=Tk()
+
+
+
+
+
+
+
+
 main_window.title('GenSCor')
 main_window.config(bg='#CEE5D0')
+main_window.minsize(400,400)
+
+load_rules("toto.json")
+print_all()
+
+print_GUI_rules()
+
+My_button1=tkinter.Button(main_window, text="Describe_all", command=print_all)
+My_button2=tkinter.Button(main_window, text="Score_it", command=score_all)
+My_button1.grid(column=5,row=5)
+My_button2.grid(column=5,row=6)
 
 
-menubar=Menu(main_window)
-filemenu=Menu(menubar, tearoff=0)
-filemenu.add_command(label="Load Rules", command=fonction_vide)
-filemenu.add_command(label="Load Data", command=fonction_vide)
-filemenu.insert_separator(index=2)
-filemenu.add_command(label="Save Rules", command=fonction_vide)
-filemenu.add_command(label="Export Data", command=fonction_vide)
-filemenu.insert_separator(index=5)
-filemenu.add_command(label="Quit", command=fonction_vide)
-
-menubar.add_cascade(label="File", menu=filemenu)
-
-
-
-rule_test1=Rules("on",[1,2],["match",">="],["Pathogenic",50],"up",50)
-rule_test=Rules("on",[1,2],["match",">="],["Pathogenic",50],"up",50)
-print(rule_test1.convert_to_json())
-#test sur les donnees du fichier data
-variants_list=load_data("data")
-
-
-
-for i in variants_list:
-    score_it(rule_test, i)
-    print(i.get_Attributs()[0],i.get_Score())
-
-export_data("test",variants_list)
-
-main_window.config(menu=menubar)
-#main_window.mainloop()
+main_window.mainloop()

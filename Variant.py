@@ -14,3 +14,8 @@ class Variant:
 
     def get_Attributs(self):
         return self.Attributs
+
+    def describe(self):
+        print("L'objet variant contient ces infrmations :")
+        print(self.get_Score())
+        print(self.get_Attributs())

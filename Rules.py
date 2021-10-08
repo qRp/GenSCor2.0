@@ -49,9 +49,18 @@ class Rules:
     def set_value(self,value):
         self.value=value
 
+    def describe(self):
+        print("L'instance de l'objet Rule est composé de :")
+        print(self.get_status())
+        #print(self.get_column())
+        #print(self.get_operator())
+        #print(self.get_value())
+        #print(self.get_sens())
+        #print(self.get_score_val())
+
     def convert_to_json(self):
         size_list=len(self.get_column())
-        my_json='{"status": "'+self.get_status()+'","Column": ['
+        my_json='{"Status": "'+self.get_status()+'","Column": ['
         cpt=0
         for i in self.get_column():
             cpt+=1

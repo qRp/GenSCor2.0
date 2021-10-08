@@ -1,5 +1,0 @@
-chr1:123456A>T  Pathogenic  50  a_phrase
-chr2:123456A>T  Benign  100 a_word
-chr4:123456A>T  Likely_pathogenic  100 another_word
-chr5:123456A>T  Benign  12 another_world
-chr6:123456A>T  Benign  1 and_another_one
