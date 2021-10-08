@@ -182,23 +182,25 @@ def print_all():
 
 
 def print_GUI_rules():
-    global rules_list
+    global rules_list,GUI_var_list
     #initialisation de la liste de dictionnaire ou sont stockés les boutons
     GUI_var_list = [dict() for x in range(len(rules_list))]
     cpt=0
     index=0
     for i in rules_list:
-        print_rule(i,index,GUI_var_list,cpt)
+        print_rule(i,index,cpt)
         cpt+=1
         index+=1
 
 
-def print_rule(i,index,GUI_var_list,cpt):
+def print_rule(i,index,cpt):
+    global GUI_var_list
     font_on="-overstrike 0"
     font_off="-overstrike 1"
     bg_on="#CEE5D0"
     bg_off="grey"
     def updated_status(i,index):
+
         i.set_status(GUI_var_list[index]["status"].get())
         if i.get_status() == "on":
             text_label1['font']=font_on
@@ -208,25 +210,45 @@ def print_rule(i,index,GUI_var_list,cpt):
             text_label1['font'] = font_off
             text_label1['bg'] = bg_off
 
+    def updated_sens(i,index):
+        print("Ici :")
+        print(GUI_var_list)
+        print(index)
+        #print(GUI_var_list[index])
+        print(GUI_var_list[0]["sens"].get())
+        #i.set_sens(GUI_var_list[index]["sens"].get())
 
+    #creation de la checkbox status
     checkbox_var = tkinter.StringVar()
-    GUI_var_list[index] = {"status": checkbox_var}
+    GUI_var_list[index]["status"]=checkbox_var
     status_checkbox = tkinter.Checkbutton(main_window, variable=GUI_var_list[index]["status"], onvalue="on",
                 offvalue="off", command=lambda index=index, i=i: updated_status(i,index))
     if i.get_status() == "on":
-        font = "-overstrike 0"
-        color = "#CEE5D0"
+        font = font_on
+        color = bg_on
         status_checkbox.select()
     else:
-        font = "-overstrike 1"
-        color = "grey"
+        font = font_off
+        color = bg_off
     status_checkbox.grid(column=1, row=cpt)
+
+    #Creation du premier label
     text_label1 = tkinter.Label(main_window, text="Si toutes ces conditions sont vrais, le score va")
     text_label1.configure(font=font, bg=color)
     text_label1.grid(column=2, row=cpt)
-    sens_label = tkinter.Label(main_window, text=i.get_sens())
+
+    #Creation de l'option menu sens
+    option_sens = ["up", "down"]
+    option_sens_var=tkinter.StringVar()
+    GUI_var_list[index]["sens"] = option_sens_var
+    GUI_var_list[index]["sens"].set(i.get_sens())
+    print("toto"+str(index))
+    sens_label = tkinter.OptionMenu(main_window, option_sens_var, *option_sens,
+                                    command=lambda new_value, index=index, i=i: updated_sens(i,index))
     sens_label.configure(font=font, bg=color)
     sens_label.grid(column=3, row=cpt)
+
+
     text_label2 = tkinter.Label(main_window, text=" de ")
     text_label2.grid(column=4, row=cpt)
     value_label = tkinter.Label(main_window, text=i.get_score_val())
