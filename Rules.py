@@ -52,11 +52,11 @@ class Rules:
     def describe(self):
         print("L'instance de l'objet Rule est composé de :")
         print(self.get_status())
-        #print(self.get_column())
-        #print(self.get_operator())
-        #print(self.get_value())
-        #print(self.get_sens())
-        #print(self.get_score_val())
+        print(self.get_column())
+        print(self.get_operator())
+        print(self.get_value())
+        print(self.get_sens())
+        print(self.get_score_val())
 
     def convert_to_json(self):
         size_list=len(self.get_column())

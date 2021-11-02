@@ -1,4 +1,5 @@
 import re
+import tkinter
 import tkinter.filedialog
 from Rules import *
 from Variant import *
@@ -200,7 +201,6 @@ def print_rule(i,index,cpt):
     bg_on="#CEE5D0"
     bg_off="grey"
     def updated_status(i,index):
-
         i.set_status(GUI_var_list[index]["status"].get())
         if i.get_status() == "on":
             text_label1['font']=font_on
@@ -242,17 +242,21 @@ def print_rule(i,index,cpt):
     option_sens_var=tkinter.StringVar()
     GUI_var_list[index]["sens"] = option_sens_var
     GUI_var_list[index]["sens"].set(i.get_sens())
-    print("toto"+str(index))
-    sens_label = tkinter.OptionMenu(main_window, option_sens_var, *option_sens,
+    sens_optionmenu = tkinter.OptionMenu(main_window, option_sens_var, *option_sens,
                                     command=lambda new_value, index=index, i=i: updated_sens(i,index))
-    sens_label.configure(font=font, bg=color)
-    sens_label.grid(column=3, row=cpt)
+    sens_optionmenu.configure(font=font, bg=color)
+    sens_optionmenu.grid(column=3, row=cpt)
 
-
+    #Creation du deuxième label
     text_label2 = tkinter.Label(main_window, text=" de ")
     text_label2.grid(column=4, row=cpt)
+    #creation du champs score value
+    score_value_var = tkinter.IntVar()
+    GUI_var_list[index]["score_value"]=score_value_var
+    combobox = ttk.combobox(container, textvariable=widget_var)
     value_label = tkinter.Label(main_window, text=i.get_score_val())
     value_label.grid(column=5, row=cpt)
+    #creatio ndu torisieme label
     text_label3 = tkinter.Label(main_window, text=" point(s).")
     text_label3.grid(column=6, row=cpt)
     for j in range(len(i.get_column())):
