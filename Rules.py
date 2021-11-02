@@ -19,6 +19,9 @@ class Rules:
     def get_column(self):
         return self.column
 
+    def get_column_value(self):
+        return self.column
+
     def get_sens(self):
         return self.sens
 

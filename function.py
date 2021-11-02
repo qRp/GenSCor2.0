@@ -189,7 +189,7 @@ def print_GUI_rules():
     cpt=0
     index=0
     for i in rules_list:
-        print_rule(i,index,cpt)
+        cpt=print_rule(i,index,cpt)
         cpt+=1
         index+=1
 
@@ -211,17 +211,17 @@ def print_rule(i,index,cpt):
             text_label1['bg'] = bg_off
 
     def updated_sens(i,index):
-        print("Ici :")
-        print(GUI_var_list)
+        print("Update sens")
+        #print(GUI_var_list)
         #print(GUI_var_list[index])
-        print(GUI_var_list[index]["sens"].get())
+        #print(GUI_var_list[index]["sens"].get())
         #i.set_sens(GUI_var_list[index]["sens"].get())
         #here recalcule score
 
     def updated_score_val(i, index):
         print("Update score val")
-        print(GUI_var_list)
-        print(GUI_var_list[index]["score_value"].get())
+        #print(GUI_var_list)
+        #print(GUI_var_list[index]["score_value"].get())
         #here recalcule score
 
     #creation de la checkbox status
@@ -260,18 +260,24 @@ def print_rule(i,index,cpt):
     score_value_var = tkinter.StringVar()
     GUI_var_list[index]["score_value"]=score_value_var
     GUI_var_list[index]["score_value"].set(i.get_score_val())
-    score_value_entry = tkinter.Entry(main_window, textvariable=score_value_var,
-                                        validatecommand= lambda index=index, i=i: updated_score_val(i,index), validate='all')
+    GUI_var_list[index]["score_value"].trace_add('write', lambda value, index=index, i=i: updated_score_val(i,index))
+    score_value_entry = tkinter.Entry(main_window, textvariable=score_value_var)
     score_value_entry.grid(column=5, row=cpt)
 
     #creation du troisieme label
     text_label3 = tkinter.Label(main_window, text=" point(s).")
     text_label3.grid(column=6, row=cpt)
+    #retour à la ligne et boucle sur les conditions
     for j in range(len(i.get_column())):
         cpt += 1
-        column_label = tkinter.Label(main_window, text=i.get_column()[j])
+        #affichage des combobox colonnes
+        column_combobox = tkinter.StringVar()
+        GUI_var_list[index]["column"] = column_combobox
+        GUI_var_list[index]["column"].set(i.get_column())
+        column_label = tkinter.combobox(main_window, text=i.get_column()[j])
         column_label.grid(column=2, row=cpt)
         operator_label = tkinter.Label(main_window, text=i.get_operator()[j])
         operator_label.grid(column=3, row=cpt)
         score_val_label = tkinter.Label(main_window, text=i.get_value()[j])
         score_val_label.grid(column=4, row=cpt)
+    return cpt
