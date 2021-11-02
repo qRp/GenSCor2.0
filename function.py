@@ -1,5 +1,6 @@
 import re
 import tkinter
+import tkinter.ttk
 import tkinter.filedialog
 from Rules import *
 from Variant import *
@@ -100,13 +101,18 @@ def compare(working_value, operator, value):
 
 
 def load_data(file_path):
-    global variants_list
+    global variants_list, header_list
     variants_list=[]
     f = open(file_path, "r")
     lines = f.readlines()
+    header=True
     for line in lines:
         data_line = line.split()
-        variants_list.append(Variant(data_line))
+        if header == True:
+            header_list=data_line
+            header=False
+        else :
+            variants_list.append(Variant(data_line))
 
 
 def export_data(file_path):
@@ -180,7 +186,11 @@ def print_all():
     for i in rules_list:
         i.describe()
 
-
+def list_possible_values(index):
+    list_of_values={}
+    for i in variants_list:
+        list_of_values[i.get_one_attribut(index)]=1
+    return list_of_values.keys()
 
 def print_GUI_rules():
     global rules_list,GUI_var_list
@@ -274,7 +284,7 @@ def print_rule(i,index,cpt):
         column_combobox = tkinter.StringVar()
         GUI_var_list[index]["column"] = column_combobox
         GUI_var_list[index]["column"].set(i.get_column())
-        column_label = tkinter.combobox(main_window, text=i.get_column()[j])
+        column_label = tkinter.ttk.Combobox(main_window, text=i.get_column()[j])
         column_label.grid(column=2, row=cpt)
         operator_label = tkinter.Label(main_window, text=i.get_operator()[j])
         operator_label.grid(column=3, row=cpt)

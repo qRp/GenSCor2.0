@@ -1,2 +1,11 @@
 Verifier la fonction compare pour gerer le typage des données
 Vérifier que le fichier n'existe pas déjà pour la fonction export
+
+nouvelle classe pour stocker toutes les données ?
+
+idée : comment récuperer rapidement et simplement les informations : nom de la colonne et liste des valeurs présentes dans la colonne.
+
+option 1 : super classe data qui regroupe tout et méthode dédié
+
+option 2 : header list qui contient le header
+fonction dédiée pour renvoyer la liste des valeurs possibles ?

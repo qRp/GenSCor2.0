@@ -20,7 +20,8 @@ class Rules:
         return self.column
 
     def get_column_value(self):
-        return self.column
+        value=header_list[self.column]
+        return value
 
     def get_sens(self):
         return self.sens

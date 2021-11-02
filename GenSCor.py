@@ -1,5 +1,6 @@
 from tkinter.messagebox import *
 from tkinter import *
+from tkinter.ttk import *
 from langage import *
 from Variant import *
 from Rules import *
@@ -34,9 +35,13 @@ main_window.config(bg='#CEE5D0')
 main_window.minsize(400,400)
 
 load_rules("toto.json")
+load_data('data.tsv')
+
 print_all()
 
 print_GUI_rules()
+print(list_possible_values(2))
+print(list_possible_values(3))
 
 My_button1=tkinter.Button(main_window, text="Describe_all", command=print_all)
 My_button2=tkinter.Button(main_window, text="Score_it", command=score_all)
