@@ -213,10 +213,16 @@ def print_rule(i,index,cpt):
     def updated_sens(i,index):
         print("Ici :")
         print(GUI_var_list)
-        print(index)
         #print(GUI_var_list[index])
-        print(GUI_var_list[0]["sens"].get())
+        print(GUI_var_list[index]["sens"].get())
         #i.set_sens(GUI_var_list[index]["sens"].get())
+        #here recalcule score
+
+    def updated_score_val(i, index):
+        print("Update score val")
+        print(GUI_var_list)
+        print(GUI_var_list[index]["score_value"].get())
+        #here recalcule score
 
     #creation de la checkbox status
     checkbox_var = tkinter.StringVar()
@@ -251,12 +257,14 @@ def print_rule(i,index,cpt):
     text_label2 = tkinter.Label(main_window, text=" de ")
     text_label2.grid(column=4, row=cpt)
     #creation du champs score value
-    score_value_var = tkinter.IntVar()
+    score_value_var = tkinter.StringVar()
     GUI_var_list[index]["score_value"]=score_value_var
-    combobox = ttk.combobox(container, textvariable=widget_var)
-    value_label = tkinter.Label(main_window, text=i.get_score_val())
-    value_label.grid(column=5, row=cpt)
-    #creatio ndu torisieme label
+    GUI_var_list[index]["score_value"].set(i.get_score_val())
+    score_value_entry = tkinter.Entry(main_window, textvariable=score_value_var,
+                                        validatecommand= lambda index=index, i=i: updated_score_val(i,index), validate='all')
+    score_value_entry.grid(column=5, row=cpt)
+
+    #creation du troisieme label
     text_label3 = tkinter.Label(main_window, text=" point(s).")
     text_label3.grid(column=6, row=cpt)
     for j in range(len(i.get_column())):
