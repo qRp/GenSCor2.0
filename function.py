@@ -208,7 +208,7 @@ def print_GUI_rules():
 
 
 def print_rule(i,index,cpt):
-    global GUI_var_list
+    global GUI_var_list, header_list
     font_on="-overstrike 0"
     font_off="-overstrike 1"
     bg_on="#CEE5D0"
@@ -236,6 +236,16 @@ def print_rule(i,index,cpt):
         #print(GUI_var_list)
         #print(GUI_var_list[index]["score_value"].get())
         #here recalcule score
+
+    def updated_column(i, index):
+        print("Update column !")
+
+
+    def updated_operator(i, index):
+            print("Update operator !")
+
+    def updated_value(i, index):
+            print("Update value !")
 
     #creation de la checkbox status
     checkbox_var = tkinter.StringVar()
@@ -281,17 +291,34 @@ def print_rule(i,index,cpt):
     text_label3 = tkinter.Label(main_window, text=" point(s).")
     text_label3.grid(column=6, row=cpt)
     #retour à la ligne et boucle sur les conditions
+
+    GUI_var_list[index]["column"] = {}
+    GUI_var_list[index]["operator"] = {}
+    GUI_var_list[index]["value"] = {}
     for j in range(len(i.get_column())):
         cpt += 1
-        #affichage des combobox colonnes
+        #affichage des optionmenu colonnes
         column_var = tkinter.StringVar()
-        GUI_var_list[index]["column"] = column_var
-        column_value=int(i.get_one_column(j))
-        column_combobox = tkinter.ttk.Combobox(main_window, text=i.get_column()[j])
-        column_combobox['values'] = list_possible_values(column_value)
-        column_combobox.grid(column=2, row=cpt)
-        operator_label = tkinter.Label(main_window, text=i.get_operator()[j])
-        operator_label.grid(column=3, row=cpt)
-        score_val_label = tkinter.Label(main_window, text=i.get_value()[j])
-        score_val_label.grid(column=4, row=cpt)
+        GUI_var_list[index]["column"][j] = column_var
+        GUI_var_list[index]["column"][j].set(header_list[int(i.get_one_column(j))])
+        column_optionmenu = tkinter.OptionMenu(main_window, GUI_var_list[index]["column"][j],*header_list,
+                                               command= lambda index=index, i=i: updated_column(i,index))
+        column_optionmenu.grid(column=2, row=cpt)
+
+        #affichage des optionmenu colonnes
+        operator_var = tkinter.StringVar()
+        GUI_var_list[index]["operator"][j] = operator_var
+        GUI_var_list[index]["operator"][j].set(i.get_one_operator(j))
+        operator_values=["=", "!=", "<", "<=", ">", ">=", "match", "contain", "don't contain"]
+        operator_optionmenu = tkinter.OptionMenu(main_window, GUI_var_list[index]["operator"][j],*operator_values,
+                                               command= lambda index=index, i=i: updated_operator(i,index))
+        operator_optionmenu.grid(column=3, row=cpt)
+        #value combobox
+        value_var=tkinter.StringVar()
+        GUI_var_list[index]["value"][j] = value_var
+        value_combobox = tkinter.ttk.Combobox(main_window, textvariable=GUI_var_list[index]["value"][j], validate='focusout',
+                                validatecommand= lambda index=index, i=i: updated_value(i,index))
+        value_combobox['values'] = list_possible_values(int(i.get_one_column(j)))
+        value_combobox.set(i.get_one_value(j))
+        value_combobox.grid(column=4, row=cpt)
     return cpt

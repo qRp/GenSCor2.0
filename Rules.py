@@ -22,6 +22,12 @@ class Rules:
     def get_one_column(self,i):
         return self.column[i]
 
+    def get_one_operator(self, i):
+        return self.operator[i]
+
+    def get_one_value(self, i):
+        return self.value[i]
+
     def get_sens(self):
         return self.sens
 
