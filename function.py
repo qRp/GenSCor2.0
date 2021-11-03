@@ -188,9 +188,12 @@ def print_all():
 
 def list_possible_values(index):
     list_of_values={}
+    return_list=[]
     for i in variants_list:
         list_of_values[i.get_one_attribut(index)]=1
-    return list_of_values.keys()
+    for i in list_of_values.keys():
+        return_list.append(i)
+    return return_list
 
 def print_GUI_rules():
     global rules_list,GUI_var_list
@@ -281,11 +284,12 @@ def print_rule(i,index,cpt):
     for j in range(len(i.get_column())):
         cpt += 1
         #affichage des combobox colonnes
-        column_combobox = tkinter.StringVar()
-        GUI_var_list[index]["column"] = column_combobox
-        GUI_var_list[index]["column"].set(i.get_column())
-        column_label = tkinter.ttk.Combobox(main_window, text=i.get_column()[j])
-        column_label.grid(column=2, row=cpt)
+        column_var = tkinter.StringVar()
+        GUI_var_list[index]["column"] = column_var
+        column_value=int(i.get_one_column(j))
+        column_combobox = tkinter.ttk.Combobox(main_window, text=i.get_column()[j])
+        column_combobox['values'] = list_possible_values(column_value)
+        column_combobox.grid(column=2, row=cpt)
         operator_label = tkinter.Label(main_window, text=i.get_operator()[j])
         operator_label.grid(column=3, row=cpt)
         score_val_label = tkinter.Label(main_window, text=i.get_value()[j])
