@@ -242,8 +242,6 @@ def print_rule(i,index,cpt):
 
     def updated_operator(i, index, j):
         print("Update operator !")
-        print(index)
-        print(j)
         i.set_operator(GUI_var_list[index]["operator"][int(j)].get())
         score_all()
 
