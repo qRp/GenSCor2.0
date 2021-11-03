@@ -15,6 +15,7 @@ def score_all():
         if i.get_status() == "on":
              for j in variants_list:
                 score_it(i,j)
+    print_GUI_variants()
 
 
 def score_it(rule, variant):
@@ -225,32 +226,37 @@ def print_rule(i,index,cpt):
 
     def updated_sens(i,index):
         print("Update sens")
-        #print(GUI_var_list)
-        #print(GUI_var_list[index])
-        #print(GUI_var_list[index]["sens"].get())
-        #i.set_sens(GUI_var_list[index]["sens"].get())
-        #here recalcule score
+        i.set_sens(GUI_var_list[index]["sens"].get())
+        score_all()
 
-    def updated_score_val(i, index):
+    def updated_score_val(i, index, j):
         print("Update score val")
-        #print(GUI_var_list)
-        #print(GUI_var_list[index]["score_value"].get())
-        #here recalcule score
+        i.set_score_val(GUI_var_list[index]["score_value"][int(j)].get())
+        score_all()
 
-    def updated_column(i, index):
+    def updated_column(i, index, j):
         print("Update column !")
+        i.set_column(GUI_var_list[index]["column"][int(j)].get())
+        score_all()
 
 
-    def updated_operator(i, index):
-            print("Update operator !")
+    def updated_operator(i, index, j):
+        print("Update operator !")
+        print(index)
+        print(j)
+        i.set_operator(GUI_var_list[index]["operator"][int(j)].get())
+        score_all()
 
     def updated_value(i, index):
-            print("Update value !")
+        print("Update value !")
+        i.set_value(GUI_var_list[index]["value"].get())
+        score_all()
+
 
     #creation de la checkbox status
     checkbox_var = tkinter.StringVar()
     GUI_var_list[index]["status"]=checkbox_var
-    status_checkbox = tkinter.Checkbutton(main_window, variable=GUI_var_list[index]["status"], onvalue="on",
+    status_checkbox = tkinter.Checkbutton(rules_canvas, variable=GUI_var_list[index]["status"], onvalue="on",
                 offvalue="off", command=lambda index=index, i=i: updated_status(i,index))
     if i.get_status() == "on":
         font = font_on
@@ -262,7 +268,7 @@ def print_rule(i,index,cpt):
     status_checkbox.grid(column=1, row=cpt)
 
     #Creation du premier label
-    text_label1 = tkinter.Label(main_window, text="Si toutes ces conditions sont vrais, le score va")
+    text_label1 = tkinter.Label(rules_canvas, text="Si toutes ces conditions sont vrais, le score va")
     text_label1.configure(font=font, bg=color)
     text_label1.grid(column=2, row=cpt)
 
@@ -271,24 +277,24 @@ def print_rule(i,index,cpt):
     option_sens_var=tkinter.StringVar()
     GUI_var_list[index]["sens"] = option_sens_var
     GUI_var_list[index]["sens"].set(i.get_sens())
-    sens_optionmenu = tkinter.OptionMenu(main_window, option_sens_var, *option_sens,
+    sens_optionmenu = tkinter.OptionMenu(rules_canvas, option_sens_var, *option_sens,
                                     command=lambda new_value, index=index, i=i: updated_sens(i,index))
     sens_optionmenu.configure(font=font, bg=color)
     sens_optionmenu.grid(column=3, row=cpt)
 
     #Creation du deuxième label
-    text_label2 = tkinter.Label(main_window, text=" de ")
+    text_label2 = tkinter.Label(rules_canvas, text=" de ")
     text_label2.grid(column=4, row=cpt)
     #creation du champs score value
     score_value_var = tkinter.StringVar()
     GUI_var_list[index]["score_value"]=score_value_var
     GUI_var_list[index]["score_value"].set(i.get_score_val())
-    GUI_var_list[index]["score_value"].trace_add('write', lambda value, index=index, i=i: updated_score_val(i,index))
-    score_value_entry = tkinter.Entry(main_window, textvariable=score_value_var)
+    GUI_var_list[index]["score_value"].trace_add('write', lambda new_value, index=index, i=i: updated_score_val(i,index))
+    score_value_entry = tkinter.Entry(rules_canvas, textvariable=score_value_var)
     score_value_entry.grid(column=5, row=cpt)
 
     #creation du troisieme label
-    text_label3 = tkinter.Label(main_window, text=" point(s).")
+    text_label3 = tkinter.Label(rules_canvas, text=" point(s).")
     text_label3.grid(column=6, row=cpt)
     #retour à la ligne et boucle sur les conditions
 
@@ -301,8 +307,8 @@ def print_rule(i,index,cpt):
         column_var = tkinter.StringVar()
         GUI_var_list[index]["column"][j] = column_var
         GUI_var_list[index]["column"][j].set(header_list[int(i.get_one_column(j))])
-        column_optionmenu = tkinter.OptionMenu(main_window, GUI_var_list[index]["column"][j],*header_list,
-                                               command= lambda index=index, i=i: updated_column(i,index))
+        column_optionmenu = tkinter.OptionMenu(rules_canvas, GUI_var_list[index]["column"][j],*header_list,
+                                               command= lambda new_value, index=index, i=i, j=j: updated_column(i,index, j))
         column_optionmenu.grid(column=2, row=cpt)
 
         #affichage des optionmenu colonnes
@@ -310,15 +316,29 @@ def print_rule(i,index,cpt):
         GUI_var_list[index]["operator"][j] = operator_var
         GUI_var_list[index]["operator"][j].set(i.get_one_operator(j))
         operator_values=["=", "!=", "<", "<=", ">", ">=", "match", "contain", "don't contain"]
-        operator_optionmenu = tkinter.OptionMenu(main_window, GUI_var_list[index]["operator"][j],*operator_values,
-                                               command= lambda index=index, i=i: updated_operator(i,index))
+        operator_optionmenu = tkinter.OptionMenu(rules_canvas, GUI_var_list[index]["operator"][j],*operator_values,
+                                               command= lambda new_value, index=index, i=i, j=j: updated_operator(i,index, j))
         operator_optionmenu.grid(column=3, row=cpt)
         #value combobox
         value_var=tkinter.StringVar()
         GUI_var_list[index]["value"][j] = value_var
-        value_combobox = tkinter.ttk.Combobox(main_window, textvariable=GUI_var_list[index]["value"][j], validate='focusout',
-                                validatecommand= lambda index=index, i=i: updated_value(i,index))
+        value_combobox = tkinter.ttk.Combobox(rules_canvas, textvariable=GUI_var_list[index]["value"][j], validate='focusout',
+                                validatecommand= lambda new_value, index=index, i=i, j=j: updated_value(i,index, j))
         value_combobox['values'] = list_possible_values(int(i.get_one_column(j)))
         value_combobox.set(i.get_one_value(j))
         value_combobox.grid(column=4, row=cpt)
     return cpt
+
+
+def print_GUI_variants():
+    #todo trier variants, ajouter header, ajouter score, update score, afficher que top 10 premiers, naviguation variants suivants
+    cpt_y=0
+    for i in variants_list:
+        cpt_y+=1
+        cpt_x=0
+        score_label=tkinter.Label(variants_canvas, text=i.get_Score())
+        score_label.grid(row=cpt_y, column=cpt_x)
+        for j in i.get_Attributs():
+            cpt_x+=1
+            my_label=tkinter.Label(variants_canvas, text=j)
+            my_label.grid(row=cpt_y, column=cpt_x)
