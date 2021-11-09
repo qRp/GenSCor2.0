@@ -7,26 +7,35 @@ from Variant import *
 from Glob import *
 import json
 
+#Calculate the score for all the variants with every rules
 def score_all():
     global rules_list, variants_list
+    #for each variants in the list, we reset the score
     for i in variants_list:
         i.set_Score(0)
+    #for each rule in the list
     for i in rules_list:
+        #if the rule is active, we use it on every variants
         if i.get_status() == "on":
              for j in variants_list:
                 score_it(i,j)
+    #actualising the GUI
     print_GUI_variants()
 
-
+#calculate the score for one variant with one rule
 def score_it(rule, variant):
     to_return = 0
-    rule.describe()
-    variant.describe()
+    #rule.describe()
+    #variant.describe()
+    #for each condition of the rule
     for i in range(len(rule.get_column())):
         working_value = variant.get_one_attribut(i)
+        #testing the condition on the variant
         result = compare(working_value, rule.get_one_operator(i), rule.get_one_value(i))
+        #if the condition is true, we add 1
         if result:
             to_return+=1
+    #if all the conditions are true, we update the score
     if to_return == len(rule.get_column()):
         if rule.get_sens() == "up":
             variant.set_Score(variant.get_Score() + float(rule.get_score_val()))
@@ -35,13 +44,10 @@ def score_it(rule, variant):
     else:
         return False
 
-#fonction qui renvoie vrai si l'égalité "working_value operator value" est vraie
+#function to check if a condition is true on a variant
 def compare(working_value, operator, value):
-    #Verification de la cohérence des types de données
-#    if not float(operator) and not float(value):
-#        if operator in ("=", ">", ">=", "<", "<="):
-#            print("erreur de type, les opérations =, <, <=, >, >= ne peuvent être appliqués que sur des données numériques")
-    print("comparaison :"+str(working_value)+" "+str(operator)+" "+str(value))
+    #print("comparaison :"+str(working_value)+" "+str(operator)+" "+str(value))
+    #encapsulate to handle type problems. For each possible operator, we test the condition and return the according result.
     try :
         if operator == ">" :
             if float(working_value) > float(value) :
@@ -101,54 +107,69 @@ def compare(working_value, operator, value):
         print("Le type de donnée n'est pas adapté à l'opérateur")
 
 
+#load data from file
 def load_data(file_path):
     global variants_list, header_list
+    #reset the variants_list
     variants_list=[]
+    #opening and reading the file
     f = open(file_path, "r")
     lines = f.readlines()
+    #if there is a header
     header=True
     for line in lines:
         data_line = line.split()
+        #updating the header and not putting it into the variants list
         if header == True:
             header_list=data_line
             header=False
         else :
+            #if it is not a header line, adding to the list of variants
             variants_list.append(Variant(data_line))
 
-
+#writing data into file
 def export_data(file_path):
     global variants_list
+    #openning and writing the score for each variant
     f = open(file_path, "w")
     for i in variants_list:
         f.write(str(i.get_Score())+"\t")
+        #and writing every attributes for each variant
         for j in i.get_Attributs():
             f.write(j+"\t")
         f.write("\n")
 
+#writing rules into file
 def write_rules(file_path):
     global rules_list
+    #openning of the file
     f = open(file_path, "w")
     f.write('{"rules":\n')
+    #for each rules, we convert it into json format and write the resulting string into file
     for i in rules_list:
         rule_json=i.convert_to_json()
         f.write(rule_json+"\n")
     f.write('}')
 
+#loading rules from file
 def load_rules(file_path):
     global rules_list
+    #openning and reading
     rules_list=[]
     f = open(file_path, "r")
     lines=f.readlines()
+    #for each line, extract rule info. The expected format is json.
     for line in lines:
         try :
             jdict=json.loads(line)
             rule=Rules(jdict["Status"],jdict["Column"],jdict["Operator"],jdict["Value"],jdict["Sens"], jdict["Score_val"])
             rules_list.append(rule)
+        #if the line is not in json format, we do nothing
         except :
             pass
 
 
-
+#function triggered before loading rules from file. Ask the user where is the file to load.
 def preload_rules():
     file=tkinter.filedialog.askopenfilename(filetypes =[('Json Files', '*.json'),('All Files', '*')])
     if file is not None:
@@ -156,6 +177,7 @@ def preload_rules():
     else :
         return 1
 
+#function triggered before loading variants from file. Ask the user where is the file to load.
 def preload_data():
     file=tkinter.filedialog.askopenfilename(filetypes=[('txt Files', '*.txt'),('tsv Files', '*.tsv'),('All Files', '*')])
     if file is not None:
@@ -163,7 +185,7 @@ def preload_data():
     else:
         return 1
 
-
+#function triggered before writing rules from file. Ask the user where is the file to write into.
 def prewrite_rules():
     file=tkinter.filedialog.asksaveasfilename(filetypes=[('json Files', '*.json'),('All Files', '*')], defaultextension=".json")
     if file is not None:
@@ -171,6 +193,7 @@ def prewrite_rules():
     else:
         return 1
 
+#function triggered before writing data rules from file. Ask the user where is the file to write into.
 def preexport_data():
     file=tkinter.filedialog.asksaveasfilename(filetypes=[('tsv Files', '*.tsv'),('txt Files', '*.txt'),('All Files', '*')],defaultextension=".tsv")
     if file is not None:
@@ -178,40 +201,57 @@ def preexport_data():
     else:
         return 1
 
+#copy and paste a rule.
 def dupliquate_rule(rule):
         global rules_list
+        #getting all the info of the mother rule
         status=rule.get_status()
         column=rule.get_column()
         operator=rule.get_operator()
         sens=rule.get_sens()
         value=rule.get_value()
         score_val=rule.get_score_val()
+        #creating the daughter rule with the same infos
         rule = Rules(status, column, operator, value, sens, score_val)
+        #adding the rule to the list
         rules_list.append(rule)
+        #and updating the GUI
         print_GUI_rules()
 
+#remove a rule
 def delete_rule(index):
     global rules_list
+    #remove the rule from the list
     rules_list.pop(index)
+    #remove everything on the GUI
     for i in (rules_frame.winfo_children()):
         i.destroy()
+    #and recreating the GUI
     print_GUI_rules()
 
+
+#print everything into the log console. Used for debug purposes.
 def print_all():
     global variants_list, rules_list
     print("Describe all :")
+    #print everything about the variants
     for i in variants_list:
         i.describe()
+    #print everything about the rules
     for i in rules_list:
         i.describe()
 
+#Get all the possible values in a column of data
 def list_possible_values(index):
     list_of_values={}
     return_list=[]
+    #for each variants in the list, we are looking the value in the column of interest and adding it to a dictionnary
     for i in variants_list:
         list_of_values[i.get_one_attribut(index)]=1
+    #for each different value, adding it to the return list
     for i in list_of_values.keys():
         return_list.append(i)
+    #and returning the list
     return return_list
 
 def print_GUI_rules():
