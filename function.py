@@ -22,9 +22,9 @@ def score_it(rule, variant):
     to_return = 0
     rule.describe()
     variant.describe()
-    for i in range(len(rule.get_column())): #a revoir, probablement à ameliorer avec les nouveaux getters
+    for i in range(len(rule.get_column())):
         working_value = variant.get_one_attribut(i)
-        result = compare(working_value, rule.operator[i], rule.value[i])
+        result = compare(working_value, rule.get_one_operator(i), rule.get_one_value(i))
         if result:
             to_return+=1
     if to_return == len(rule.get_column()):
@@ -178,6 +178,24 @@ def preexport_data():
     else:
         return 1
 
+def dupliquate_rule(rule):
+        global rules_list
+        status=rule.get_status()
+        column=rule.get_column()
+        operator=rule.get_operator()
+        sens=rule.get_sens()
+        value=rule.get_value()
+        score_val=rule.get_score_val()
+        rule = Rules(status, column, operator, value, sens, score_val)
+        rules_list.append(rule)
+        print_GUI_rules()
+
+def delete_rule(index):
+    global rules_list
+    rules_list.pop(index)
+    for i in (rules_frame.winfo_children()):
+        i.destroy()
+    print_GUI_rules()
 
 def print_all():
     global variants_list, rules_list
@@ -210,19 +228,25 @@ def print_GUI_rules():
 
 def print_rule(i,index,cpt):
     global GUI_var_list, header_list
-    font_on="-overstrike 0"
-    font_off="-overstrike 1"
-    bg_on="#CEE5D0"
-    bg_off="grey"
+    style_on = {'bg': '#CEE5D0', 'font':"-overstrike 0"}
+    style_off = {'bg': 'grey', 'font': "-overstrike 1"}
+
+    column_start=3
+    def update_GUI(style_actif):
+        status_button.configure(style_actif)
+        text_label1.configure(style_actif)
+        sens_optionmenu.configure(style_actif)
+        text_label2.configure(style_actif)
+        text_label3.configure(style_actif)
+
     def updated_status(i,index):
-        i.set_status(GUI_var_list[index]["status"].get())
         if i.get_status() == "on":
-            text_label1['font']=font_on
-            text_label1['bg']=bg_on
-            status_checkbox.select()
+            i.set_status("off")
+            style_actif=style_off
         else:
-            text_label1['font'] = font_off
-            text_label1['bg'] = bg_off
+            i.set_status("on")
+            style_actif=style_on
+        update_GUI(style_actif)
 
     def updated_sens(i,index):
         print("Update sens")
@@ -236,39 +260,42 @@ def print_rule(i,index,cpt):
 
     def updated_column(i, index, j):
         print("Update column !")
-        i.set_column(GUI_var_list[index]["column"][int(j)].get())
+        i.set_one_column(GUI_var_list[index]["column"][int(j)].get(),j)
         score_all()
-
 
     def updated_operator(i, index, j):
         print("Update operator !")
-        i.set_operator(GUI_var_list[index]["operator"][int(j)].get())
+        i.set_one_operator(GUI_var_list[index]["operator"][int(j)].get(),j)
         score_all()
 
-    def updated_value(i, index):
+    def updated_value(i, index, j):
         print("Update value !")
-        i.set_value(GUI_var_list[index]["value"].get())
+        print(i)
+        print(index)
+        print(j)
+        i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
         score_all()
 
+    #creation du bouton Dupliquer
+    dupliquer_button = tkinter.Button(rules_frame, text="Dupliquer", command=lambda i=i: dupliquate_rule(i))
+    dupliquer_button.grid(column=column_start-1, row=cpt)
+    #creation du bouton Delete
+    delete_button = tkinter.Button(rules_frame, text="Supprimer", command=lambda index=index: delete_rule(index))
+    delete_button.grid(column=column_start, row=cpt)
 
-    #creation de la checkbox status
-    checkbox_var = tkinter.StringVar()
-    GUI_var_list[index]["status"]=checkbox_var
-    status_checkbox = tkinter.Checkbutton(rules_frame, variable=GUI_var_list[index]["status"], onvalue="on",
-                offvalue="off", command=lambda index=index, i=i: updated_status(i,index))
+    #creation du bouton Mute
+    status_button = tkinter.Button(rules_frame, text="Mute", command=lambda index=index, i=i: updated_status(i,index))
     if i.get_status() == "on":
-        font = font_on
-        color = bg_on
-        status_checkbox.select()
+        style_actif=style_on
     else:
-        font = font_off
-        color = bg_off
-    status_checkbox.grid(column=1, row=cpt)
+        style_actif=style_off
+    status_button.configure(style_actif)
+    status_button.grid(column=column_start+1, row=cpt)
 
     #Creation du premier label
     text_label1 = tkinter.Label(rules_frame, text="Si toutes ces conditions sont vrais, le score va")
-    text_label1.configure(font=font, bg=color)
-    text_label1.grid(column=2, row=cpt)
+    text_label1.configure(style_actif)
+    text_label1.grid(column=column_start+2, row=cpt)
 
     #Creation de l'option menu sens
     option_sens = ["up", "down"]
@@ -277,23 +304,25 @@ def print_rule(i,index,cpt):
     GUI_var_list[index]["sens"].set(i.get_sens())
     sens_optionmenu = tkinter.OptionMenu(rules_frame, option_sens_var, *option_sens,
                                     command=lambda new_value, index=index, i=i: updated_sens(i,index))
-    sens_optionmenu.configure(font=font, bg=color)
-    sens_optionmenu.grid(column=3, row=cpt)
+    sens_optionmenu.configure(style_actif)
+    sens_optionmenu.grid(column=column_start+3, row=cpt)
 
     #Creation du deuxième label
     text_label2 = tkinter.Label(rules_frame, text=" de ")
-    text_label2.grid(column=4, row=cpt)
+    text_label2.configure(style_actif)
+    text_label2.grid(column=column_start+4, row=cpt)
     #creation du champs score value
     score_value_var = tkinter.StringVar()
     GUI_var_list[index]["score_value"]=score_value_var
     GUI_var_list[index]["score_value"].set(i.get_score_val())
     GUI_var_list[index]["score_value"].trace_add('write', lambda new_value, index=index, i=i: updated_score_val(i,index))
     score_value_entry = tkinter.Entry(rules_frame, textvariable=score_value_var)
-    score_value_entry.grid(column=5, row=cpt)
+    score_value_entry.grid(column=column_start+5, row=cpt)
 
     #creation du troisieme label
     text_label3 = tkinter.Label(rules_frame, text=" point(s).")
-    text_label3.grid(column=6, row=cpt)
+    text_label3.configure(style_actif)
+    text_label3.grid(column=column_start+6, row=cpt)
     #retour à la ligne et boucle sur les conditions
 
     GUI_var_list[index]["column"] = {}
@@ -306,8 +335,8 @@ def print_rule(i,index,cpt):
         GUI_var_list[index]["column"][j] = column_var
         GUI_var_list[index]["column"][j].set(header_list[int(i.get_one_column(j))])
         column_optionmenu = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["column"][j],*header_list,
-                                               command= lambda new_value, index=index, i=i, j=j: updated_column(i,index, j))
-        column_optionmenu.grid(column=2, row=cpt)
+                                               command= lambda new_value, index=index, i=i, j=j: updated_column(i,index, j, new_value))
+        column_optionmenu.grid(column=column_start+2, row=cpt)
 
         #affichage des optionmenu colonnes
         operator_var = tkinter.StringVar()
@@ -316,15 +345,16 @@ def print_rule(i,index,cpt):
         operator_values=["=", "!=", "<", "<=", ">", ">=", "match", "contain", "don't contain"]
         operator_optionmenu = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["operator"][j],*operator_values,
                                                command= lambda new_value, index=index, i=i, j=j: updated_operator(i,index, j))
-        operator_optionmenu.grid(column=3, row=cpt)
+        operator_optionmenu.grid(column=column_start+3, row=cpt)
         #value combobox
         value_var=tkinter.StringVar()
         GUI_var_list[index]["value"][j] = value_var
         value_combobox = tkinter.ttk.Combobox(rules_frame, textvariable=GUI_var_list[index]["value"][j], validate='focusout',
-                                validatecommand= lambda new_value, index=index, i=i, j=j: updated_value(i,index, j))
+                                validatecommand= lambda index=index, i=i, j=j:
+                                updated_value(i,index, j))
         value_combobox['values'] = list_possible_values(int(i.get_one_column(j)))
         value_combobox.set(i.get_one_value(j))
-        value_combobox.grid(column=4, row=cpt)
+        value_combobox.grid(column=column_start+4, row=cpt)
     return cpt
 
 

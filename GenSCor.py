@@ -8,6 +8,7 @@ from function import *
 from Glob import *
 import re
 import json
+#todo changer les imports pour eviter les wildcards
 
 #create Menu
 menubar = Menu(super_window)
@@ -22,24 +23,26 @@ filemenu.add_command(label="Quit", command=tkinter.messagebox.askokcancel)
 menubar.add_cascade(label="File", menu=filemenu)
 super_window.config(menu=menubar)
 
+#Define maine parameters for the window
 super_window.title('GenSCor')
 super_window.config(bg='#CEE5D0')
-#super_window.minsize(400,400)
 
+
+#loading rules and data to test
 load_rules("toto.json")
 load_data('data.tsv')
-
+#printing all the data and rules to test
 print_all()
 
+#printing the loaded rules and variants on the GUI
 print_GUI_rules()
 print_GUI_variants()
-print(list_possible_values(2))
-print(list_possible_values(3))
 
+#Create button for test purposes
 My_button1=tkinter.Button(rules_frame, text="Describe_all", command=print_all)
 My_button2=tkinter.Button(rules_frame, text="Score_it", command=score_all)
 My_button1.grid(column=5,row=5)
 My_button2.grid(column=5,row=6)
 
-
+#main loop
 main_window.mainloop()

@@ -13,51 +13,79 @@ class Rules:
         # the value to add or substract to the score
         self.score_val=score_val
 
+    #return the status of the rules
     def get_status(self):
         return self.status
 
+    #return the list of columns
     def get_column(self):
         return self.column
 
+    #return only one column at the specified index.
     def get_one_column(self,i):
         return self.column[i]
 
+    #return only one operator at the specified index
     def get_one_operator(self, i):
         return self.operator[i]
 
+    #return only one value at the specified index
     def get_one_value(self, i):
         return self.value[i]
 
+    #return the direction of the score change
     def get_sens(self):
         return self.sens
 
+    #return the score value to add or substract
     def get_score_val(self):
         return self.score_val
 
+    #change the status of the rule
     def set_status(self,status):
         self.status=status
 
+    #change the direction of the score
     def set_sens(self,sens):
         self.sens=sens
 
+    #change the score value to add or substract
     def set_score_val(self,score_val):
         self.score_val=score_val
 
+    #return the list of operators
     def get_operator(self):
         return self.operator
 
+    #return the list of values
     def get_value(self):
         return self.value
 
+    #change the list of columns.
     def set_column(self,column):
         self.column=column
 
+    #change the list of operators
     def set_operator(self,operator):
         self.operator=operator
 
+    #change the list of values
     def set_value(self,value):
         self.value=value
 
+    #change only one column at the specified index. Used for the GUI.
+    def set_one_column(self,column,i):
+        self.column[i]=column
+
+    #change only one operator at the specified index. Used for the GUI.
+    def set_one_operator(self,operator,i):
+        self.operator[i]=operator
+
+    #change only one value at the specified index. Used for the GUI.
+    def set_one_value(self,value,i):
+        self.value[i]=value
+
+    #print everything about the rule. Used for debug purposes.
     def describe(self):
         print("L'instance de l'objet Rule est composé de :")
         print(self.get_status())
@@ -67,6 +95,7 @@ class Rules:
         print(self.get_sens())
         print(self.get_score_val())
 
+    #convert the rule to a json string for saving.
     def convert_to_json(self):
         size_list=len(self.get_column())
         my_json='{"Status": "'+self.get_status()+'","Column": ['
