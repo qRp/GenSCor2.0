@@ -9,6 +9,7 @@ import json
 
 #Calculate the score for all the variants with every rules
 def score_all():
+    print("Début score")
     global rules_list, variants_list
     #for each variants in the list, we reset the score
     for i in variants_list:
@@ -30,10 +31,6 @@ def score_it(rule, variant):
     #for each condition of the rule
     for i in range(len(rule.get_column())):
         working_value = variant.get_one_attribut(int(rule.get_one_column(i)))
-        print(i)
-        print(working_value)
-        print(variant.get_Attributs())
-
         #testing the condition on the variant
         result = compare(working_value, rule.get_one_operator(i), rule.get_one_value(i))
         #if the condition is true, we add 1
@@ -52,11 +49,7 @@ def score_it(rule, variant):
 def compare(working_value, operator, value):
     #print("comparaison :"+str(working_value)+" "+str(operator)+" "+str(value))
     #encapsulate to handle type problems. For each possible operator, we test the condition and return the according result.
-#    try :
-        print("working value, operator, value")
-        print(working_value)
-        print(operator)
-        print(value)
+    try :
         if operator == ">" :
             if float(working_value) > float(value) :
                 return True
@@ -108,11 +101,11 @@ def compare(working_value, operator, value):
                 return True
             else:
                 return False
-    #except TypeError:
-    #    print("Le type de donnée n'est pas adapté à l'opérateur")
-    #    return False
-    #except ValueError:
-    #    print("Le type de donnée n'est pas adapté à l'opérateur")
+    except TypeError:
+        print("Le type de donnée n'est pas adapté à l'opérateur")
+        return False
+    except ValueError:
+        print("Le type de donnée n'est pas adapté à l'opérateur")
 
 
 #load data from file
@@ -263,9 +256,10 @@ def list_possible_values(index):
     return return_list
 
 def print_GUI_rules():
-    global rules_list,GUI_var_list
+    global rules_list,GUI_var_list, GUI_item_list
     #initialisation de la liste de dictionnaire ou sont stockés les boutons
     GUI_var_list = [dict() for x in range(len(rules_list))]
+    GUI_item_list = [dict() for x in range(len(rules_list))]
     cpt=0
     index=0
     for i in rules_list:
@@ -275,12 +269,14 @@ def print_GUI_rules():
 
 
 def print_rule(i,index,cpt):
-    global GUI_var_list, header_list
+    global GUI_var_list, header_list, GUI_item_list
     style_on = {'bg': '#CEE5D0', 'font':"-overstrike 0"}
     style_off = {'bg': 'grey', 'font': "-overstrike 1"}
 
     column_start=3
     def update_GUI(style_actif):
+        dupliquer_button.configure(style_actif)
+        delete_button.configure(style_actif)
         status_button.configure(style_actif)
         text_label1.configure(style_actif)
         sens_optionmenu.configure(style_actif)
@@ -320,20 +316,14 @@ def print_rule(i,index,cpt):
         i.set_one_operator(GUI_var_list[index]["operator"][int(j)].get(),j)
         score_all()
 
-    def updated_value(i, index, j):
+    def updated_value(event, i, index, j):
         print("Update value !")
         print(i)
         print(index)
         print(j)
+        print(GUI_var_list[index]["value"][j].get())
         i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
         score_all()
-
-    #creation du bouton Dupliquer
-    dupliquer_button = tkinter.Button(rules_frame, text="Dupliquer", command=lambda i=i: dupliquate_rule(i))
-    dupliquer_button.grid(column=column_start-1, row=cpt)
-    #creation du bouton Delete
-    delete_button = tkinter.Button(rules_frame, text="Supprimer", command=lambda index=index: delete_rule(index))
-    delete_button.grid(column=column_start, row=cpt)
 
     #creation du bouton Mute
     status_button = tkinter.Button(rules_frame, text="Mute", command=lambda index=index, i=i: updated_status(i,index))
@@ -344,6 +334,15 @@ def print_rule(i,index,cpt):
     status_button.configure(style_actif)
     status_button.grid(column=column_start+1, row=cpt)
 
+    #creation du bouton Dupliquer
+    dupliquer_button = tkinter.Button(rules_frame, text="Dup", command=lambda i=i: dupliquate_rule(i))
+    dupliquer_button.grid(column=column_start-1, row=cpt)
+    dupliquer_button.configure(style_actif)
+
+    #creation du bouton Delete
+    delete_button = tkinter.Button(rules_frame, text="Sup", command=lambda index=index: delete_rule(index))
+    delete_button.grid(column=column_start, row=cpt)
+    delete_button.configure(style_actif)
     #Creation du premier label
     text_label1 = tkinter.Label(rules_frame, text="Si toutes ces conditions sont vrais, le score va")
     text_label1.configure(style_actif)
@@ -380,6 +379,7 @@ def print_rule(i,index,cpt):
     GUI_var_list[index]["column"] = {}
     GUI_var_list[index]["operator"] = {}
     GUI_var_list[index]["value"] = {}
+    GUI_item_list[index]["combobox_value"]={}
     for j in range(len(i.get_column())):
         cpt += 1
         #affichage des optionmenu colonnes
@@ -401,17 +401,19 @@ def print_rule(i,index,cpt):
         #value combobox
         value_var=tkinter.StringVar()
         GUI_var_list[index]["value"][j] = value_var
-        value_combobox = tkinter.ttk.Combobox(rules_frame, textvariable=GUI_var_list[index]["value"][j], validate='focusout',
-                                validatecommand= lambda index=index, i=i, j=j:
-                                updated_value(i,index, j))
-        value_combobox['values'] = list_possible_values(int(i.get_one_column(j)))
-        value_combobox.set(i.get_one_value(j))
-        value_combobox.grid(column=column_start+4, row=cpt)
+        GUI_item_list[index]["combobox_value"][j]=tkinter.ttk.Combobox(rules_frame, textvariable=GUI_var_list[index]["value"][j])
+        GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
+        GUI_item_list[index]["combobox_value"][j].bind("<<ComboboxSelected>>", lambda event, i=i, index=index, j=j : updated_value(event, i, index, j))
+        GUI_item_list[index]["combobox_value"][j].set(i.get_one_value(j))
+        GUI_item_list[index]["combobox_value"][j].grid(column=column_start+4, row=cpt)
     return cpt
 
 
 def print_GUI_variants():
     #todo trier variants, ajouter header, ajouter score, update score, afficher que top 10 premiers, naviguation variants suivants
+    #remove everything on the GUI
+    for i in (variants_frame.winfo_children()):
+        i.destroy()
     cpt_y=0
     for i in variants_list:
         cpt_y+=1
