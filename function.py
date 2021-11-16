@@ -29,7 +29,11 @@ def score_it(rule, variant):
     #variant.describe()
     #for each condition of the rule
     for i in range(len(rule.get_column())):
-        working_value = variant.get_one_attribut(i)
+        working_value = variant.get_one_attribut(int(rule.get_one_column(i)))
+        print(i)
+        print(working_value)
+        print(variant.get_Attributs())
+
         #testing the condition on the variant
         result = compare(working_value, rule.get_one_operator(i), rule.get_one_value(i))
         #if the condition is true, we add 1
@@ -48,7 +52,11 @@ def score_it(rule, variant):
 def compare(working_value, operator, value):
     #print("comparaison :"+str(working_value)+" "+str(operator)+" "+str(value))
     #encapsulate to handle type problems. For each possible operator, we test the condition and return the according result.
-    try :
+#    try :
+        print("working value, operator, value")
+        print(working_value)
+        print(operator)
+        print(value)
         if operator == ">" :
             if float(working_value) > float(value) :
                 return True
@@ -100,11 +108,11 @@ def compare(working_value, operator, value):
                 return True
             else:
                 return False
-    except TypeError:
-        print("Le type de donnée n'est pas adapté à l'opérateur")
-        return False
-    except ValueError:
-        print("Le type de donnée n'est pas adapté à l'opérateur")
+    #except TypeError:
+    #    print("Le type de donnée n'est pas adapté à l'opérateur")
+    #    return False
+    #except ValueError:
+    #    print("Le type de donnée n'est pas adapté à l'opérateur")
 
 
 #load data from file
@@ -298,8 +306,12 @@ def print_rule(i,index,cpt):
         i.set_score_val(GUI_var_list[index]["score_value"][int(j)].get())
         score_all()
 
-    def updated_column(i, index, j):
+    def updated_column(new_value, i, index, j):
         print("Update column !")
+        print(new_value)
+        print(i)
+        print(index)
+        print(j)
         i.set_one_column(GUI_var_list[index]["column"][int(j)].get(),j)
         score_all()
 
@@ -375,7 +387,7 @@ def print_rule(i,index,cpt):
         GUI_var_list[index]["column"][j] = column_var
         GUI_var_list[index]["column"][j].set(header_list[int(i.get_one_column(j))])
         column_optionmenu = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["column"][j],*header_list,
-                                               command= lambda new_value, index=index, i=i, j=j: updated_column(i,index, j, new_value))
+                                               command= lambda new_value, index=index, i=i, j=j: updated_column(new_value, i,index, j))
         column_optionmenu.grid(column=column_start+2, row=cpt)
 
         #affichage des optionmenu colonnes
