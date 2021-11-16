@@ -1,5 +1,5 @@
 class Rules:
-    def __init__(self,status="on",column=[], operator=[], value=[], sens="up", score_val=0):
+    def __init__(self,status="on",column=[0], operator=["="], value=[0], sens="up", score_val=0):
         #status may be on or off : active or inactive
         self.status=status
         #a list of index of variants.attributs
@@ -75,15 +75,43 @@ class Rules:
 
     #change only one column at the specified index. Used for the GUI.
     def set_one_column(self,column,i):
-        self.column[i]=column
+        #simple case : we are changing one value
+        try:
+            self.column[i]=column
+        #other case : we are adding a new condition
+        except IndexError:
+            self.column.append(column)
 
     #change only one operator at the specified index. Used for the GUI.
     def set_one_operator(self,operator,i):
-        self.operator[i]=operator
+        # simple case : we are changing one value
+        try:
+            self.operator[i]=operator
+        # other case : we are adding a new condition
+        except IndexError:
+            self.operator.append(operator)
+
 
     #change only one value at the specified index. Used for the GUI.
     def set_one_value(self,value,i):
-        self.value[i]=value
+        # simple case : we are changing one value
+        try:
+            self.value[i]=value
+        # other case : we are adding a new condition
+        except IndexError:
+            self.value.append(value)
+
+    #change only one column at the specified index. Used for the GUI.
+    def remove_one_column(self,i):
+        self.column.pop(i)
+
+    #change only one operator at the specified index. Used for the GUI.
+    def remove_one_operator(self,i):
+        self.operator.pop(i)
+
+    #change only one value at the specified index. Used for the GUI.
+    def remove_one_value(self,i):
+        self.value.pop(i)
 
     #print everything about the rule. Used for debug purposes.
     def describe(self):

@@ -202,6 +202,17 @@ def preexport_data():
     else:
         return 1
 
+#create a rule
+def create_rule():
+    global rules_list
+    new_rule=Rules()
+    rules_list.append(new_rule)
+    # remove everything on the GUI
+    for i in (rules_frame.winfo_children()):
+        i.destroy()
+    #Updating the GUI, we need to destroy the button may be duplicate otherwise
+    print_GUI_rules()
+
 #copy and paste a rule.
 def dupliquate_rule(rule):
         global rules_list
@@ -231,6 +242,44 @@ def delete_rule(index):
     print_GUI_rules()
 
 
+#copy and paste a condition.
+def dupliquate_condition(i, j):
+        global rules_list
+        #getting the number of conditions at this point.
+        size=len(i.get_column())
+        #getting the same values that the condition to copy
+        operator=i.get_one_operator(j)
+        value=i.get_one_value(j)
+        column=i.get_one_column(j)
+        #pasting into a new condition
+        i.set_one_value(value, size)
+        i.set_one_column(column, size)
+        i.set_one_operator(operator, size)
+        # remove everything on the GUI because we must shift all widgets
+        for i in (rules_frame.winfo_children()):
+            i.destroy()
+        #and updating the GUI
+        print_GUI_rules()
+
+#remove a condition
+def delete_condition(index, j):
+    global rules_list
+    rule=rules_list[index]
+    rule.remove_one_value(j)
+    rule.remove_one_operator(j)
+    rule.remove_one_column(j)
+    #if the rule is empty
+    if len(rule.get_column())==0:
+        delete_rule(index)
+    else:
+       #remove everything on the GUI
+       for i in (rules_frame.winfo_children()):
+           i.destroy()
+       #and recreating the GUI
+       print_GUI_rules()
+
+
+
 #print everything into the log console. Used for debug purposes.
 def print_all():
     global variants_list, rules_list
@@ -257,23 +306,31 @@ def list_possible_values(index):
 
 def print_GUI_rules():
     global rules_list,GUI_var_list, GUI_item_list
+    column_start = 3
     #initialisation de la liste de dictionnaire ou sont stockés les boutons
     GUI_var_list = [dict() for x in range(len(rules_list))]
     GUI_item_list = [dict() for x in range(len(rules_list))]
     cpt=0
     index=0
     for i in rules_list:
-        cpt=print_rule(i,index,cpt)
+        cpt=print_rule(i,index,cpt, column_start)
         cpt+=1
         index+=1
+    # Create button for test purposes
+    My_button1 = tkinter.Button(rules_frame, text="Describe_all", command=print_all)
+    My_button2 = tkinter.Button(rules_frame, text="Score_it", command=score_all)
+    My_button1.grid(column=column_start+2, row=cpt+1)
+    My_button2.grid(column=column_start+1, row=cpt+1)
+    #Create button for adding a new rule
+    Add_button = tkinter.Button(rules_frame, text="Add new rule", command=lambda: create_rule())
+    Add_button.grid(column=column_start, row=cpt+1)
 
 
-def print_rule(i,index,cpt):
+def print_rule(i,index,cpt, column_start):
     global GUI_var_list, header_list, GUI_item_list
     style_on = {'bg': '#CEE5D0', 'font':"-overstrike 0"}
     style_off = {'bg': 'grey', 'font': "-overstrike 1"}
 
-    column_start=3
     def update_GUI(style_actif):
         dupliquer_button.configure(style_actif)
         delete_button.configure(style_actif)
@@ -308,7 +365,10 @@ def print_rule(i,index,cpt):
         print(i)
         print(index)
         print(j)
-        i.set_one_column(GUI_var_list[index]["column"][int(j)].get(),j)
+        new_column_index=header_list.index(GUI_var_list[index]["column"][int(j)].get())
+        i.set_one_column(new_column_index,j)
+        GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
+        GUI_item_list[index]["combobox_value"][j].set(GUI_item_list[index]["combobox_value"][j]['values'][0])
         score_all()
 
     def updated_operator(i, index, j):
@@ -382,6 +442,16 @@ def print_rule(i,index,cpt):
     GUI_item_list[index]["combobox_value"]={}
     for j in range(len(i.get_column())):
         cpt += 1
+        # creation du bouton Dupliquer
+        dupliquer_button = tkinter.Button(rules_frame, text="Dup", command=lambda i=i: dupliquate_condition(i, j))
+        dupliquer_button.grid(column=column_start + 1, row=cpt)
+        dupliquer_button.configure(style_actif)
+
+        # creation du bouton Delete
+        delete_button = tkinter.Button(rules_frame, text="Sup", command=lambda index=index: delete_condition(index, j))
+        delete_button.grid(column=column_start, row=cpt)
+        delete_button.configure(style_actif)
+
         #affichage des optionmenu colonnes
         column_var = tkinter.StringVar()
         GUI_var_list[index]["column"][j] = column_var

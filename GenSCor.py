@@ -38,11 +38,6 @@ print_all()
 print_GUI_rules()
 print_GUI_variants()
 
-#Create button for test purposes
-My_button1=tkinter.Button(rules_frame, text="Describe_all", command=print_all)
-My_button2=tkinter.Button(rules_frame, text="Score_it", command=score_all)
-My_button1.grid(column=5,row=5)
-My_button2.grid(column=5,row=6)
 
 #main loop
 main_window.mainloop()
