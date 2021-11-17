@@ -202,6 +202,82 @@ def preexport_data():
     else:
         return 1
 
+#launch the no visual mode for autoscoring multiples files
+def launch_automode():
+    #list of filenames
+    data_file_list=()
+    rules_file_list=()
+    #nested function to update the list of filenames with a dialog box
+    def select_data():
+        nonlocal data_file_list
+        files=tkinter.filedialog.askopenfilenames(filetypes=[('tsv Files', '*.tsv'),('txt Files', '*.txt'),('All Files', '*')]
+                                                  ,defaultextension=".tsv")
+        #if there is file selected, we update the list
+        if len(files)!=0:
+            data_file_list=files
+            #and we update the GUI to print the selected files
+            update_GUI_no_visual()
+        else:
+            return None
+    #nested function to update the list of data filenames with a dialog box
+    def select_rules():
+        nonlocal rules_file_list
+        files = tkinter.filedialog.askopenfilenames(filetypes=[('json Files', '*.json'), ('All Files', '*')],
+                                                    defaultextension=".json")
+        #if some files are selected
+        if len(files)!=0:
+            rules_file_list=files
+            #updating the GUI to print the selected filepath
+            update_GUI_no_visual()
+        else:
+            return None
+
+    #Calculate the score for all the combinaison rules / Variants
+    def calculate():
+        for data_file in data_file_list:
+            load_data(data_file)
+            for rule_file in rules_file_list:
+                load_rules(rule_file)
+                score_all()
+                export_data(temp)
+
+    #all the items of the GUI
+    def update_GUI_no_visual():
+        #We start by removing everything
+        for i in (automode_windows.winfo_children()):
+            i.destroy()
+        #we create three buttons : one for the rules, one for the variant and one for the scoring
+        select_data_button = tkinter.Button(automode_windows, text="Select data", command=select_data)
+        select_rules_button = tkinter.Button(automode_windows, text="Select Rules", command=select_rules)
+        score_all_button=tkinter.Button(automode_windows, text="Calculer le score", command=calculate)
+        #griding the first button
+        select_data_button.grid(column=1, row=0)
+        #gridding the score button only if there is rules AND data selected
+        if len(rules_file_list) !=0 and len(data_file_list) !=0 :
+            score_all_button.grid(column=2, row=0)
+        #gridding the last one
+        select_rules_button.grid(column=3, row=0)
+        cpt=0
+        #for each data filepath selected, printing it in a label
+        for i in data_file_list :
+            cpt+=1
+            data_label=tkinter.Label(automode_windows, text=i)
+            data_label.grid(column=1, row=cpt)
+        cpt=0
+        #for each rules filepath selected, printing it in a label
+        for i in rules_file_list :
+            cpt+=1
+            rule_label=tkinter.Label(automode_windows, text=i)
+            rule_label.grid(column=3, row=cpt)
+
+    #Window creation and resizing
+    automode_windows=tkinter.Tk()
+    automode_windows.title('Automode')
+    automode_windows.geometry('310x110')
+    update_GUI_no_visual()
+    automode_windows.mainloop()
+
+
 #create a rule
 def create_rule():
     global rules_list
