@@ -1,4 +1,5 @@
 import tkinter
+
 #the list of the rules objects
 rules_list=[]
 #the list of the variants objects

@@ -1,8 +1,9 @@
+from Glob import *
 class Rules:
-    def __init__(self,status="on",column=[0], operator=["="], value=[0], sens="up", score_val=0):
+    def __init__(self,status="on",column=[0], operator=["="], value=[0], sens="up", score_val=0, text_colum=[""]):
         #status may be on or off : active or inactive
         self.status=status
-        #a list of index of variants.attributs
+        #a list of strings of variants.attributs
         self.column=column
         #a list of operator
         self.operator=operator
@@ -12,6 +13,8 @@ class Rules:
         self.sens=sens
         # the value to add or substract to the score
         self.score_val=score_val
+        #the header of the selected columns
+        self.text_column=text_colum
 
     #return the status of the rules
     def get_status(self):
@@ -21,9 +24,17 @@ class Rules:
     def get_column(self):
         return self.column
 
+    #return the list of textcolumns
+    def get_textcolumn(self):
+        return self.text_column
+
     #return only one column at the specified index.
     def get_one_column(self,i):
         return self.column[i]
+
+    #return only one column at the specified index.
+    def get_one_textcolumn(self,i):
+        return self.text_column[i]
 
     #return only one operator at the specified index
     def get_one_operator(self, i):
@@ -78,9 +89,11 @@ class Rules:
         #simple case : we are changing one value
         try:
             self.column[i]=column
+            self.text_column[i]=header_list[column]
         #other case : we are adding a new condition
         except IndexError:
             self.column.append(column)
+            self.text_column.append(header_list[column])
 
     #change only one operator at the specified index. Used for the GUI.
     def set_one_operator(self,operator,i):
@@ -123,33 +136,4 @@ class Rules:
         print(self.get_sens())
         print(self.get_score_val())
 
-    #convert the rule to a json string for saving.
-    def convert_to_json(self):
-        size_list=len(self.get_column())
-        my_json='{"Status": "'+self.get_status()+'","Column": ['
-        cpt=0
-        for i in self.get_column():
-            cpt+=1
-            my_json=my_json+'"'+str(i)+'"'
-            if cpt < size_list:
-                my_json=my_json+','
-            else :
-                my_json=my_json+'], "Operator": ['
-        cpt=0
-        for i in self.get_operator():
-            cpt+=1
-            my_json=my_json+'"'+str(i)+'"'
-            if cpt < size_list:
-                my_json=my_json+','
-            else :
-                my_json=my_json+'], "Value": ['
-        cpt=0
-        for i in self.get_value():
-            cpt+=1
-            my_json=my_json+'"'+str(i)+'"'
-            if cpt < size_list:
-                my_json=my_json+','
-            else :
-                my_json=my_json+'], "Sens":"'
-        my_json = my_json+self.get_sens()+'","Score_val": "'+str(self.get_score_val())+'"}'
-        return my_json
+

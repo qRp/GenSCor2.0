@@ -31,10 +31,10 @@ super_window.config(bg='#CEE5D0')
 
 
 #loading rules and data to test
-load_rules("toto.json")
 load_data('data.tsv')
+load_rules("toto.json")
 #printing all the data and rules to test
-print_all()
+#print_all()
 
 #printing the loaded rules and variants on the GUI
 print_GUI_rules()

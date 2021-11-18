@@ -29,3 +29,6 @@ class Variant:
         print("L'objet variant contient ces infrmations :")
         print(self.get_Score())
         print(self.get_Attributs())
+
+
+

@@ -107,6 +107,57 @@ def compare(working_value, operator, value):
     except ValueError:
         print("Le type de donnée n'est pas adapté à l'opérateur")
 
+    #convert the rule to a json string for saving.
+def convert_to_json(rule):
+    global header_list
+    size_list=len(rule.get_column())
+    my_json='{"Status": "'+rule.get_status()+'","TextColumn": ['
+    cpt=0
+    for i in rule.get_textcolumn():
+        cpt+=1
+        my_json=my_json+'"'+str(i)+'"'
+        if cpt < size_list:
+            my_json=my_json+','
+        else :
+            my_json=my_json+'], "Operator": ['
+    cpt=0
+    for i in rule.get_operator():
+        cpt+=1
+        my_json=my_json+'"'+str(i)+'"'
+        if cpt < size_list:
+            my_json=my_json+','
+        else :
+            my_json=my_json+'], "Value": ['
+    cpt=0
+    for i in rule.get_value():
+        cpt+=1
+        my_json=my_json+'"'+str(i)+'"'
+        if cpt < size_list:
+            my_json=my_json+','
+        else :
+            my_json=my_json+'], "Sens":"'
+    my_json = my_json+rule.get_sens()+'","Score_val": "'+str(rule.get_score_val())+'"}'
+    return my_json
+
+def header_index_to_string(index):
+    print(index)
+    print(header_list)
+    return header_list[index]
+
+def header_string_to_index(string):
+    print(header_list)
+    return header_list.index(string)
+
+def header_update():
+    global rules_list
+    for rule in rules_list:
+        text_column_list=rule.get_textcolumn()
+        for i in range(len(text_column_list)):
+            text_column=rule.get_one_textcolumn(i)
+            index=header_list.index(text_column)
+            rule.set_one_column(index, i)
+
+
 
 #load data from file
 def load_data(file_path):
@@ -117,13 +168,14 @@ def load_data(file_path):
     f = open(file_path, "r")
     lines = f.readlines()
     #if there is a header
-    header=True
+    header_is_set=False
     for line in lines:
         data_line = line.split()
         #updating the header and not putting it into the variants list
-        if header == True:
+        if header_is_set == False:
             header_list=data_line
-            header=False
+            header_update()
+            header_is_set=True
         else :
             #if it is not a header line, adding to the list of variants
             variants_list.append(Variant(data_line))
@@ -148,13 +200,14 @@ def write_rules(file_path):
     f.write('{"rules":\n')
     #for each rules, we convert it into json format and write the resulting string into file
     for i in rules_list:
-        rule_json=i.convert_to_json()
+        i.describe()
+        rule_json=convert_to_json(i)
         f.write(rule_json+"\n")
     f.write('}')
 
 #loading rules from file
 def load_rules(file_path):
-    global rules_list
+    global rules_list, header_list
     #openning and reading
     rules_list=[]
     f = open(file_path, "r")
@@ -163,7 +216,15 @@ def load_rules(file_path):
     for line in lines:
         try :
             jdict=json.loads(line)
-            rule=Rules(jdict["Status"],jdict["Column"],jdict["Operator"],jdict["Value"],jdict["Sens"], jdict["Score_val"])
+            Columns=[]
+            #if there is a header defined, we directly set the column index
+            for i in jdict["TextColumn"]:
+                if len(header_list)!=0:
+                    Columns.append(i)
+                #else, we initialise with 0, waiting for data to be loaded
+                else:
+                    Columns.append(0)
+            rule=Rules(jdict["Status"],jdict["Column"],jdict["Operator"],jdict["Value"],jdict["Sens"], jdict["Score_val"], jdict["TextColumn"])
             rules_list.append(rule)
         #if the line is not in json format, we do nothing
         except :
@@ -180,6 +241,7 @@ def preload_rules():
 
 #function triggered before loading variants from file. Ask the user where is the file to load.
 def preload_data():
+    global header_list
     file=tkinter.filedialog.askopenfilename(filetypes=[('txt Files', '*.txt'),('tsv Files', '*.tsv'),('All Files', '*')])
     if file is not None:
         load_data(file)
@@ -239,7 +301,7 @@ def launch_automode():
             for rule_file in rules_file_list:
                 load_rules(rule_file)
                 score_all()
-                export_data(temp)
+                export_data()
 
     #all the items of the GUI
     def update_GUI_no_visual():
@@ -430,9 +492,11 @@ def print_rule(i,index,cpt, column_start):
         i.set_sens(GUI_var_list[index]["sens"].get())
         score_all()
 
-    def updated_score_val(i, index, j):
+    def updated_score_val(value, rule):
         print("Update score val")
-        i.set_score_val(GUI_var_list[index]["score_value"][int(j)].get())
+        print(value.get())
+        print(rule)
+        rule.set_score_val(value.get())
         score_all()
 
     def updated_column(new_value, i, index, j):
@@ -499,11 +563,11 @@ def print_rule(i,index,cpt, column_start):
     text_label2.configure(style_actif)
     text_label2.grid(column=column_start+4, row=cpt)
     #creation du champs score value
-    score_value_var = tkinter.StringVar()
-    GUI_var_list[index]["score_value"]=score_value_var
+    GUI_var_list[index]["score_value"]=tkinter.StringVar()
     GUI_var_list[index]["score_value"].set(i.get_score_val())
-    GUI_var_list[index]["score_value"].trace_add('write', lambda new_value, index=index, i=i: updated_score_val(i,index))
-    score_value_entry = tkinter.Entry(rules_frame, textvariable=score_value_var)
+    GUI_var_list[index]["score_value"].trace("w", lambda name, index, mode,
+                            value=GUI_var_list[index]["score_value"],rule=i: updated_score_val(value, rule))
+    score_value_entry = tkinter.Entry(rules_frame, textvariable=GUI_var_list[index]["score_value"])
     score_value_entry.grid(column=column_start+5, row=cpt)
 
     #creation du troisieme label
