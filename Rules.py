@@ -1,20 +1,38 @@
 from Glob import *
 class Rules:
-    def __init__(self,status="on",column=[0], operator=["="], value=[0], sens="up", score_val=0, text_colum=[""]):
-        #status may be on or off : active or inactive
-        self.status=status
-        #a list of strings of variants.attributs
-        self.column=column
-        #a list of operator
-        self.operator=operator
-        #a list of value to compare variant.attriuts[index] to
-        self.value=value
-        #may be up or down : the effect on the score
-        self.sens=sens
-        # the value to add or substract to the score
-        self.score_val=score_val
-        #the header of the selected columns
-        self.text_column=text_colum
+    def __init__(self,status=None,column=None, operator=None, value=None, sens=None, score_val=None, text_column=None):
+        #the structure with the none keyword is to avoid sharing a list between all instances of the classe
+        #It's a weird python way of doing things I guess.
+        # status may be on or off : active or inactive
+        if status is None: #status may be on or off : active or inactive
+            self.status = "on"
+        else:
+            self.status = status
+        if column is None: #a list of indexes of variants.attributs
+            self.column = [0]
+        else:
+            self.column = list(column)
+        if operator is None:#a list of operator
+            self.operator = ["="]
+        else:
+            self.operator = list(operator)
+        if value is None:#a list of value to compare variant.attriuts[index] to
+            self.value = [0]
+        else:
+            self.value = list(value)
+        if sens is None:#may be up or down : the effect on the score
+            self.sens = "up"
+        else:
+            self.sens = sens
+        if score_val is None:# the value to add or substract to the score
+            self.score_val = 0
+        else:
+            self.score_val = score_val
+        if text_column is None:#the header of the selected columns
+            self.text_column = [""]
+        else:
+            self.text_column = list(text_column)
+
 
     #return the status of the rules
     def get_status(self):
@@ -25,7 +43,7 @@ class Rules:
         return self.column
 
     #return the list of textcolumns
-    def get_textcolumn(self):
+    def get_text_column(self):
         return self.text_column
 
     #return only one column at the specified index.
@@ -113,6 +131,8 @@ class Rules:
 
     #change only one value at the specified index. Used for the GUI.
     def set_one_value(self,value,i):
+        print("set one value" + str(value) + str(i))
+        self.describe()
         # simple case : we are changing one value
         try:
             self.value[i]=value
@@ -124,6 +144,10 @@ class Rules:
     def remove_one_column(self,i):
         self.column.pop(i)
 
+    #change only one textcolumn at the specified index. Used for the GUI.
+    def remove_one_text_column(self,i):
+        self.text_column.pop(i)
+
     #change only one operator at the specified index. Used for the GUI.
     def remove_one_operator(self,i):
         self.operator.pop(i)
@@ -134,8 +158,8 @@ class Rules:
 
     #print everything about the rule. Used for debug purposes.
     def describe(self):
-        print("L'instance de l'objet Rule est composé de :")
+        print("L'instance de l'objet Rule "+str(self)+" est composé de :")
         print(self.get_status() +"  "+ self.get_sens() +"  "+ str(self.get_score_val()))
-        print(self.get_column() + self.get_textcolumn() + self.get_operator() + self.get_value())
+        print(self.get_column() + self.get_text_column() + self.get_operator() + self.get_value())
 
 

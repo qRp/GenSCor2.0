@@ -113,7 +113,7 @@ def convert_to_json(rule):
     size_list=len(rule.get_column())
     my_json='{"Status": "'+rule.get_status()+'","TextColumn": ['
     cpt=0
-    for i in rule.get_textcolumn():
+    for i in rule.get_text_column():
         cpt+=1
         my_json=my_json+'"'+str(i)+'"'
         if cpt < size_list:
@@ -151,9 +151,9 @@ def header_string_to_index(string):
 def header_update():
     global rules_list
     for rule in rules_list:
-        text_column_list=rule.get_textcolumn()
+        text_column_list=rule.get_text_column()
         for i in range(len(text_column_list)):
-            text_column=rule.get_one_textcolumn(i)
+            text_column=rule.get_one_text_column(i)
             index=header_list.index(text_column)
             rule.set_one_column(index, i)
 
@@ -195,6 +195,8 @@ def export_data(file_path):
 #writing rules into file
 def write_rules(file_path):
     global rules_list
+    for testitem in rules_list:
+        testitem.describe()
     #openning of the file
     f = open(file_path, "w")
     f.write('{"rules":\n')
@@ -361,14 +363,18 @@ def dupliquate_rule(rule):
         sens=rule.get_sens()
         value=rule.get_value()
         score_val=rule.get_score_val()
+        text_column=rule.get_text_column()
         #creating the daughter rule with the same infos
-        rule = Rules(status, column, operator, value, sens, score_val)
+        new_rule = Rules(status, column, operator, value, sens, score_val, text_column)
         #adding the rule to the list
-        rules_list.append(rule)
+        rules_list.append(new_rule)
         # remove everything on the GUI
         for i in (rules_frame.winfo_children()):
             i.destroy()
         #and updating the GUI
+        print("post duplicate rule")
+        for testitem in rules_list:
+            testitem.describe()
         print_GUI_rules()
 
 #remove a rule
@@ -384,32 +390,51 @@ def delete_rule(index):
 
 
 #copy and paste a condition.
-def dupliquate_condition(i, j):
+def dupliquate_condition(rule, j):
         global rules_list
+        print("start dupliquate")
+        for testitem in rules_list:
+            testitem.describe()
         #getting the number of conditions at this point.
-        size=len(i.get_column())
+        size=len(rule.get_column())
+        print("dupliquate !")
+        print(rule)
+        print(j)
+        print(size)
         #getting the same values that the condition to copy
-        operator=i.get_one_operator(j)
-        value=i.get_one_value(j)
-        column=i.get_one_column(j)
+        operator=rule.get_one_operator(j)
+        value=rule.get_one_value(j)
+        column=rule.get_one_column(j)
+        print(operator + str(column) + str(value))
         #pasting into a new condition
-        i.set_one_value(value, size)
-        i.set_one_column(column, size)
-        i.set_one_text_column(header_list[column], size)
-        i.set_one_operator(operator, size)
+        rule.set_one_value(value, size)
+        rule.set_one_column(column, size)
+        rule.set_one_text_column(header_list[column], size)
+        rule.set_one_operator(operator, size)
         # remove everything on the GUI because we must shift all widgets
-        for i in (rules_frame.winfo_children()):
-            i.destroy()
+        for item in (rules_frame.winfo_children()):
+            item.destroy()
         #and updating the GUI
+        print("juste befort GUI")
+        for testitem in rules_list:
+            testitem.describe()
         print_GUI_rules()
+        print("after GUI")
+        for testitem in rules_list:
+            testitem.describe()
 
 #remove a condition
 def delete_condition(index, j):
     global rules_list
     rule=rules_list[index]
+    print(rule)
+    print(index)
+    print(j)
     rule.remove_one_value(j)
     rule.remove_one_operator(j)
     rule.remove_one_column(j)
+    rule.remove_one_text_column(j)
+    rule.remove_one_text_column(j)
     #if the rule is empty
     if len(rule.get_column())==0:
         delete_rule(index)
@@ -528,7 +553,7 @@ def print_rule(i,index,cpt, column_start):
         i.describe()
 
     #creation du bouton Mute
-    status_button = tkinter.Button(rules_frame, text="Mute", command=lambda index=index, i=i: updated_status(i,index))
+    status_button = tkinter.Button(rules_frame, text="Mute", command=lambda i=i, index=index: updated_status(i,index))
     if i.get_status() == "on":
         style_actif=style_on
     else:
@@ -582,17 +607,19 @@ def print_rule(i,index,cpt, column_start):
     GUI_var_list[index]["operator"] = {}
     GUI_var_list[index]["value"] = {}
     GUI_item_list[index]["combobox_value"]={}
+    GUI_var_list[index]["button_dup"] = {}
+    GUI_var_list[index]["button_sup"] = {}
     for j in range(len(i.get_column())):
         cpt += 1
         # creation du bouton Dupliquer
-        dupliquer_button = tkinter.Button(rules_frame, text="Dup", command=lambda i=i: dupliquate_condition(i, j))
-        dupliquer_button.grid(column=column_start + 1, row=cpt)
-        dupliquer_button.configure(style_actif)
+        GUI_var_list[index]["button_dup"][j] = tkinter.Button(rules_frame, text="Dup", command=lambda i=i, j=j: dupliquate_condition(i, j))
+        GUI_var_list[index]["button_dup"][j].grid(column=column_start + 1, row=cpt)
+        GUI_var_list[index]["button_dup"][j].configure(style_actif)
 
         # creation du bouton Delete
-        delete_button = tkinter.Button(rules_frame, text="Sup", command=lambda index=index: delete_condition(index, j))
-        delete_button.grid(column=column_start, row=cpt)
-        delete_button.configure(style_actif)
+        GUI_var_list[index]["button_sup"][j] = tkinter.Button(rules_frame, text="Sup", command=lambda index=index, j=j: delete_condition(index, j))
+        GUI_var_list[index]["button_sup"][j].grid(column=column_start, row=cpt)
+        GUI_var_list[index]["button_sup"][j].configure(style_actif)
 
         #affichage des optionmenu colonnes
         column_var = tkinter.StringVar()
