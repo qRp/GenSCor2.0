@@ -365,6 +365,9 @@ def dupliquate_rule(rule):
         rule = Rules(status, column, operator, value, sens, score_val)
         #adding the rule to the list
         rules_list.append(rule)
+        # remove everything on the GUI
+        for i in (rules_frame.winfo_children()):
+            i.destroy()
         #and updating the GUI
         print_GUI_rules()
 
@@ -392,6 +395,7 @@ def dupliquate_condition(i, j):
         #pasting into a new condition
         i.set_one_value(value, size)
         i.set_one_column(column, size)
+        i.set_one_text_column(header_list[column], size)
         i.set_one_operator(operator, size)
         # remove everything on the GUI because we must shift all widgets
         for i in (rules_frame.winfo_children()):
@@ -478,7 +482,7 @@ def print_rule(i,index,cpt, column_start):
         text_label2.configure(style_actif)
         text_label3.configure(style_actif)
 
-    def updated_status(i,index):
+    def updated_status(i):
         if i.get_status() == "on":
             i.set_status("off")
             style_actif=style_off
@@ -486,44 +490,42 @@ def print_rule(i,index,cpt, column_start):
             i.set_status("on")
             style_actif=style_on
         update_GUI(style_actif)
+        i.describe()
 
     def updated_sens(i,index):
         print("Update sens")
         i.set_sens(GUI_var_list[index]["sens"].get())
         score_all()
+        i.describe()
 
     def updated_score_val(value, rule):
         print("Update score val")
-        print(value.get())
-        print(rule)
         rule.set_score_val(value.get())
         score_all()
+        rule.describe()
 
     def updated_column(new_value, i, index, j):
         print("Update column !")
-        print(new_value)
-        print(i)
-        print(index)
-        print(j)
         new_column_index=header_list.index(GUI_var_list[index]["column"][int(j)].get())
         i.set_one_column(new_column_index,j)
+        i.set_one_text_column(header_list[new_column_index], j)
         GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
         GUI_item_list[index]["combobox_value"][j].set(GUI_item_list[index]["combobox_value"][j]['values'][0])
+        i.set_one_value(GUI_item_list[index]["combobox_value"][j]['values'][0], j)
         score_all()
+        i.describe()
 
     def updated_operator(i, index, j):
         print("Update operator !")
         i.set_one_operator(GUI_var_list[index]["operator"][int(j)].get(),j)
         score_all()
+        i.describe()
 
     def updated_value(event, i, index, j):
         print("Update value !")
-        print(i)
-        print(index)
-        print(j)
-        print(GUI_var_list[index]["value"][j].get())
         i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
         score_all()
+        i.describe()
 
     #creation du bouton Mute
     status_button = tkinter.Button(rules_frame, text="Mute", command=lambda index=index, i=i: updated_status(i,index))

@@ -89,11 +89,9 @@ class Rules:
         #simple case : we are changing one value
         try:
             self.column[i]=column
-            self.text_column[i]=header_list[column]
         #other case : we are adding a new condition
         except IndexError:
             self.column.append(column)
-            self.text_column.append(header_list[column])
 
     #change only one operator at the specified index. Used for the GUI.
     def set_one_operator(self,operator,i):
@@ -103,6 +101,14 @@ class Rules:
         # other case : we are adding a new condition
         except IndexError:
             self.operator.append(operator)
+
+    def set_one_text_column(self,text_column,i):
+        #simple case : we are changing one value
+        try:
+            self.text_column[i]=text_column
+        #other case : we are adding a new condition
+        except IndexError:
+            self.text_column.append(text_column)
 
 
     #change only one value at the specified index. Used for the GUI.
@@ -129,11 +135,7 @@ class Rules:
     #print everything about the rule. Used for debug purposes.
     def describe(self):
         print("L'instance de l'objet Rule est composé de :")
-        print(self.get_status())
-        print(self.get_column())
-        print(self.get_operator())
-        print(self.get_value())
-        print(self.get_sens())
-        print(self.get_score_val())
+        print(self.get_status() +"  "+ self.get_sens() +"  "+ str(self.get_score_val()))
+        print(self.get_column() + self.get_textcolumn() + self.get_operator() + self.get_value())
 
 
