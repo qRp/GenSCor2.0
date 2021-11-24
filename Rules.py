@@ -1,6 +1,6 @@
 from Glob import *
 class Rules:
-    def __init__(self,status=None,column=None, operator=None, value=None, sens=None, score_val=None, text_column=None):
+    def __init__(self,status=None, operator=None, value=None, sens=None, score_val=None, text_column=None,column=None):
         #the structure with the none keyword is to avoid sharing a list between all instances of the classe
         #It's a weird python way of doing things I guess.
         # status may be on or off : active or inactive
@@ -51,7 +51,7 @@ class Rules:
         return self.column[i]
 
     #return only one column at the specified index.
-    def get_one_textcolumn(self,i):
+    def get_one_text_column(self,i):
         return self.text_column[i]
 
     #return only one operator at the specified index

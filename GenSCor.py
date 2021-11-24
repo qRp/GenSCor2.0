@@ -32,7 +32,7 @@ super_window.config(bg='#CEE5D0')
 
 #loading rules and data to test
 load_data('data.tsv')
-load_rules("toto.json")
+load_rules("toto2.json")
 #printing all the data and rules to test
 #print_all()
 

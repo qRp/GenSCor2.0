@@ -1,5 +1,7 @@
+import os.path
 import re
 import tkinter
+import shutil
 import tkinter.ttk
 import tkinter.filedialog
 from Rules import *
@@ -160,7 +162,7 @@ def header_update():
 
 
 #load data from file
-def load_data(file_path):
+def load_data(file_path, mode="classic"):
     global variants_list, header_list
     #reset the variants_list
     variants_list=[]
@@ -179,12 +181,20 @@ def load_data(file_path):
         else :
             #if it is not a header line, adding to the list of variants
             variants_list.append(Variant(data_line))
+    if mode == "classic":
+        score_all()
+        print_GUI_variants()
 
 #writing data into file
 def export_data(file_path):
-    global variants_list
+    global variants_list, header_list, Score_name
     #openning and writing the score for each variant
     f = open(file_path, "w")
+    print(header_list)
+    f.write(Score_name+"\t")
+    for i in header_list:
+        f.write(str(i)+"\t")
+    f.write("\n")
     for i in variants_list:
         f.write(str(i.get_Score())+"\t")
         #and writing every attributes for each variant
@@ -194,43 +204,59 @@ def export_data(file_path):
 
 #writing rules into file
 def write_rules(file_path):
-    global rules_list
-    for testitem in rules_list:
-        testitem.describe()
+    global rules_list, Score_name
+    #updating the score name in case we export data later
+    Score_name=os.path.basename(file_path)
     #openning of the file
     f = open(file_path, "w")
-    f.write('{"rules":\n')
+    f.write('{"rules" : [\n')
+    cpt=0
     #for each rules, we convert it into json format and write the resulting string into file
     for i in rules_list:
+        cpt+=1
         i.describe()
+        if cpt > 1:
+            f.write(",\n")
         rule_json=convert_to_json(i)
-        f.write(rule_json+"\n")
-    f.write('}')
+        f.write(rule_json)
+    f.write('\n]}')
 
 #loading rules from file
-def load_rules(file_path):
-    global rules_list, header_list
+def load_rules(file_path, mode="classic"):
+    global rules_list, header_list, Score_name
+    #Updating the score name in case we export data later
+    Score_name=os.path.basename(file_path)
     #openning and reading
     rules_list=[]
-    f = open(file_path, "r")
-    lines=f.readlines()
     #for each line, extract rule info. The expected format is json.
-    for line in lines:
-        try :
-            jdict=json.loads(line)
-            Columns=[]
-            #if there is a header defined, we directly set the column index
-            for i in jdict["TextColumn"]:
-                if len(header_list)!=0:
-                    Columns.append(i)
-                #else, we initialise with 0, waiting for data to be loaded
-                else:
-                    Columns.append(0)
-            rule=Rules(jdict["Status"],jdict["Column"],jdict["Operator"],jdict["Value"],jdict["Sens"], jdict["Score_val"], jdict["TextColumn"])
-            rules_list.append(rule)
-        #if the line is not in json format, we do nothing
-        except :
-            pass
+    #try :
+    with open(file_path) as f:
+        jdict=json.load(f)
+        print(jdict)
+    size=len(jdict["rules"])
+    #if there is a header defined, we directly set the column index
+    for i in range(size):
+        rule=Rules(
+            jdict["rules"][i]["Status"],
+            jdict["rules"][i]["Operator"],
+            jdict["rules"][i]["Value"],
+            jdict["rules"][i]["Sens"],
+            jdict["rules"][i]["Score_val"],
+            jdict["rules"][i]["TextColumn"])
+        if(len(header_list)) !=0:
+            for index in range(len(jdict["rules"][i]["TextColumn"])):
+                 rule.set_one_column(header_list.index(jdict["rules"][i]["TextColumn"][index]), index)
+        else :
+            for index in range(len(jdict["rules"][i]["TextColumn"])):
+                 rule.set_one_column(0 ,index)
+        rules_list.append(rule)
+    #if the line is not in json format, we do nothing
+    # except :
+    #    pass
+    if mode=="classic":
+        print_GUI_rules()
+        score_all()
+        print_GUI_variants()
 
 
 #function triggered before loading rules from file. Ask the user where is the file to load.
@@ -298,12 +324,19 @@ def launch_automode():
 
     #Calculate the score for all the combinaison rules / Variants
     def calculate():
-        for data_file in data_file_list:
-            load_data(data_file)
+        global variants_list, rules_list
+        variants_list=[]
+        rules_list=[]
+        for i in range(len(data_file_list)):
+            data_file_base=data_file_list[i]
+            data_file_out=data_file_base+"all_export.tsv"
+            shutil.copyfile(data_file_base, data_file_out)
             for rule_file in rules_file_list:
+                print(rule_file+"_"+data_file_out)
+                load_data(data_file_out)
                 load_rules(rule_file)
                 score_all()
-                export_data()
+                export_data(data_file_out)
 
     #all the items of the GUI
     def update_GUI_no_visual():
@@ -365,7 +398,7 @@ def dupliquate_rule(rule):
         score_val=rule.get_score_val()
         text_column=rule.get_text_column()
         #creating the daughter rule with the same infos
-        new_rule = Rules(status, column, operator, value, sens, score_val, text_column)
+        new_rule = Rules(status, operator, value, sens, score_val, text_column, column)
         #adding the rule to the list
         rules_list.append(new_rule)
         # remove everything on the GUI
@@ -433,7 +466,6 @@ def delete_condition(index, j):
     rule.remove_one_value(j)
     rule.remove_one_operator(j)
     rule.remove_one_column(j)
-    rule.remove_one_text_column(j)
     rule.remove_one_text_column(j)
     #if the rule is empty
     if len(rule.get_column())==0:
@@ -654,6 +686,14 @@ def print_GUI_variants():
     for i in (variants_frame.winfo_children()):
         i.destroy()
     cpt_y=0
+    cpt_x = 0
+    my_label=tkinter.Label(variants_frame, text="Score")
+    my_label.grid(row=cpt_y, column=cpt_x)
+
+    for header in header_list :
+        cpt_x += 1
+        my_label=tkinter.Label(variants_frame, text=header)
+        my_label.grid(row=cpt_y, column=cpt_x)
     for i in variants_list:
         cpt_y+=1
         cpt_x=0
