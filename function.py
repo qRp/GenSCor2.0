@@ -4,26 +4,39 @@ import tkinter
 import shutil
 import tkinter.ttk
 import tkinter.filedialog
+import datetime
 from Rules import *
 from Variant import *
 from Glob import *
 import json
 
 #Calculate the score for all the variants with every rules
-def score_all():
+def score_all(force=False):
+    global lasttime, rules_list, variants_list, cool_down
     print("Début score")
-    global rules_list, variants_list
-    #for each variants in the list, we reset the score
-    for i in variants_list:
-        i.set_Score(0)
-    #for each rule in the list
-    for i in rules_list:
-        #if the rule is active, we use it on every variants
-        if i.get_status() == "on":
-             for j in variants_list:
-                score_it(i,j)
-    #actualising the GUI
-    print_GUI_variants()
+    start=datetime.datetime.now()
+    print(force)
+    print("Pre Scoring")
+    if (start-lasttime).total_seconds() > cool_down or force==True:
+        lasttime=start
+        print(force)
+        print("Scoring")
+        #for each variants in the list, we reset the score
+        for i in variants_list:
+            i.set_Score(0)
+        #for each rule in the list
+        for i in rules_list:
+            #if the rule is active, we use it on every variants
+            if i.get_status() == "on":
+                for j in variants_list:
+                    score_it(i,j)
+        #actualising the GUI
+        sort_variant_list()
+        print_GUI_variants()
+
+def sort_variant_list():
+    global variants_list
+    variants_list.sort(key = lambda x: x.Score, reverse=True)
 
 #calculate the score for one variant with one rule
 def score_it(rule, variant):
@@ -104,12 +117,14 @@ def compare(working_value, operator, value):
             else:
                 return False
     except TypeError:
-        print("Le type de donnée n'est pas adapté à l'opérateur")
+        #print("Le type de donnée n'est pas adapté à l'opérateur")
         return False
     except ValueError:
-        print("Le type de donnée n'est pas adapté à l'opérateur")
+        #print("Le type de donnée n'est pas adapté à l'opérateur")
+        return False
 
     #convert the rule to a json string for saving.
+
 def convert_to_json(rule):
     global header_list
     size_list=len(rule.get_column())
@@ -159,8 +174,6 @@ def header_update():
             index=header_list.index(text_column)
             rule.set_one_column(index, i)
 
-
-
 #load data from file
 def load_data(file_path, mode="classic"):
     global variants_list, header_list
@@ -172,7 +185,7 @@ def load_data(file_path, mode="classic"):
     #if there is a header
     header_is_set=False
     for line in lines:
-        data_line = line.split()
+        data_line = line.split("\t")
         #updating the header and not putting it into the variants list
         if header_is_set == False:
             header_list=data_line
@@ -183,7 +196,6 @@ def load_data(file_path, mode="classic"):
             variants_list.append(Variant(data_line))
     if mode == "classic":
         score_all()
-        print_GUI_variants()
 
 #writing data into file
 def export_data(file_path):
@@ -257,7 +269,6 @@ def load_rules(file_path, mode="classic"):
         print_GUI_rules()
         score_all()
         print_GUI_variants()
-
 
 #function triggered before loading rules from file. Ask the user where is the file to load.
 def preload_rules():
@@ -335,7 +346,7 @@ def launch_automode():
                 print(rule_file+"_"+data_file_out)
                 load_data(data_file_out)
                 load_rules(rule_file)
-                score_all()
+                score_all(True)
                 export_data(data_file_out)
 
     #all the items of the GUI
@@ -374,6 +385,19 @@ def launch_automode():
     update_GUI_no_visual()
     automode_windows.mainloop()
 
+def launch_parameters():
+    #Window creation and resizing
+    parameters_windows=tkinter.Tk()
+    parameters_windows.title('Parameters')
+    parameters_windows.geometry('310x110')
+    #check box windowing
+    #label
+    #checkbox
+    #alert check box size
+    #entry cooldown
+    #label
+    #cooldown
+    parameters_windows.mainloop()
 
 #create a rule
 def create_rule():
@@ -420,7 +444,6 @@ def delete_rule(index):
         i.destroy()
     #and recreating the GUI
     print_GUI_rules()
-
 
 #copy and paste a condition.
 def dupliquate_condition(rule, j):
@@ -477,8 +500,6 @@ def delete_condition(index, j):
        #and recreating the GUI
        print_GUI_rules()
 
-
-
 #print everything into the log console. Used for debug purposes.
 def print_all():
     global variants_list, rules_list
@@ -517,13 +538,12 @@ def print_GUI_rules():
         index+=1
     # Create button for test purposes
     My_button1 = tkinter.Button(rules_frame, text="Describe_all", command=print_all)
-    My_button2 = tkinter.Button(rules_frame, text="Score_it", command=score_all)
+    My_button2 = tkinter.Button(rules_frame, text="Score_it", command=lambda : score_all(True))
     My_button1.grid(column=column_start+2, row=cpt+1)
     My_button2.grid(column=column_start+1, row=cpt+1)
     #Create button for adding a new rule
     Add_button = tkinter.Button(rules_frame, text="Add new rule", command=lambda: create_rule())
     Add_button.grid(column=column_start, row=cpt+1)
-
 
 def print_rule(i,index,cpt, column_start):
     global GUI_var_list, header_list, GUI_item_list
@@ -679,10 +699,10 @@ def print_rule(i,index,cpt, column_start):
         GUI_item_list[index]["combobox_value"][j].grid(column=column_start+4, row=cpt)
     return cpt
 
-
 def print_GUI_variants():
     #todo trier variants, ajouter header, ajouter score, update score, afficher que top 10 premiers, naviguation variants suivants
     #remove everything on the GUI
+    print("début GUI")
     for i in (variants_frame.winfo_children()):
         i.destroy()
     cpt_y=0
@@ -697,9 +717,15 @@ def print_GUI_variants():
     for i in variants_list:
         cpt_y+=1
         cpt_x=0
-        score_label=tkinter.Label(variants_frame, text=i.get_Score())
-        score_label.grid(row=cpt_y, column=cpt_x)
-        for j in i.get_Attributs():
-            cpt_x+=1
-            my_label=tkinter.Label(variants_frame, text=j)
-            my_label.grid(row=cpt_y, column=cpt_x)
+        if cpt_y > 20 :
+            pass
+        else :
+            score_label=tkinter.Label(variants_frame, text=i.get_Score())
+            score_label.grid(row=cpt_y, column=cpt_x)
+            for j in i.get_Attributs():
+                cpt_x+=1
+                if cpt_x > 30 :
+                    pass
+                else :
+                    my_label=tkinter.Label(variants_frame, text=j)
+                    my_label.grid(row=cpt_y, column=cpt_x)

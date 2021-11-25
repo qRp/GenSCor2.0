@@ -21,6 +21,8 @@ filemenu.add_command(label="Export Data", command=preexport_data)
 filemenu.insert_separator(index=5)
 filemenu.add_command(label="Mode non visuel", command=launch_automode)
 filemenu.insert_separator(index=7)
+filemenu.add_command(label="Parametres", command=launch_parameters)
+filemenu.insert_separator(index=9)
 filemenu.add_command(label="Quit", command=tkinter.messagebox.askokcancel)
 menubar.add_cascade(label="File", menu=filemenu)
 super_window.config(menu=menubar)
@@ -31,8 +33,8 @@ super_window.config(bg='#CEE5D0')
 
 
 #loading rules and data to test
-load_data('data.tsv')
-load_rules("toto2.json")
+#load_data('data.tsv')
+#load_rules("toto2.json")
 #printing all the data and rules to test
 #print_all()
 

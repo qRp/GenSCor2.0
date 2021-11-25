@@ -1,3 +1,4 @@
+import datetime
 import tkinter
 
 #the list of the rules objects
@@ -10,6 +11,8 @@ header_list=[]
 GUI_var_list=[]
 #the list of all the printed items
 GUI_item_list=[]
+lasttime=datetime.datetime.strptime('22/11/10', '%d/%m/%y')
+cool_down=10
 Score_name="Score"
 
 #redefine scrolling region of the upper part when the windows is resized
