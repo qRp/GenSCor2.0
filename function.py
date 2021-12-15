@@ -101,6 +101,8 @@ def compare(working_value, operator, value):
                 return False
 
         elif operator == "match":
+            if working_value == "." or value == "." :
+                return False
             if re.match(str(working_value), str(value)) :
                 return True
             else :
@@ -257,7 +259,13 @@ def load_rules(file_path, mode="classic"):
             jdict["rules"][i]["TextColumn"])
         if(len(header_list)) !=0:
             for index in range(len(jdict["rules"][i]["TextColumn"])):
-                 rule.set_one_column(header_list.index(jdict["rules"][i]["TextColumn"][index]), index)
+                try :
+                    rule.set_one_column(header_list.index(jdict["rules"][i]["TextColumn"][index]), index)
+                except (ValueError):
+                    print("Value error : "+jdict["rules"][i]["TextColumn"][index])
+                    #creer fenetre
+                    #bouton 1 : supprimer la regle
+                    #bouton 2 remplacer par une autre valeur
         else :
             for index in range(len(jdict["rules"][i]["TextColumn"])):
                  rule.set_one_column(0 ,index)
@@ -601,6 +609,7 @@ def print_rule(i,index,cpt, column_start):
     def updated_value(event, i, index, j):
         print("Update value !")
         i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
+        print(GUI_var_list[index]["value"][j].get())
         score_all()
         i.describe()
 
@@ -694,7 +703,15 @@ def print_rule(i,index,cpt, column_start):
         GUI_var_list[index]["value"][j] = value_var
         GUI_item_list[index]["combobox_value"][j]=tkinter.ttk.Combobox(rules_frame, textvariable=GUI_var_list[index]["value"][j])
         GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
-        GUI_item_list[index]["combobox_value"][j].bind("<<ComboboxSelected>>", lambda event, i=i, index=index, j=j : updated_value(event, i, index, j))
+        GUI_item_list[index]["combobox_value"][j].bind("<<ComboboxSelected>>",
+                                                       lambda event, i=i, index=index, j=j : updated_value(event, i,
+                                                                                                           index, j))
+        GUI_item_list[index]["combobox_value"][j].bind("<<Key Press>>",
+                                                       lambda event, i=i, index=index, j=j: updated_value(event, i,
+                                                                                                          index, j))
+        GUI_item_list[index]["combobox_value"][j].bind("<<Focus Out>>",
+                                                       lambda event, i=i, index=index, j=j: updated_value(event, i,
+                                                                                                          index, j))
         GUI_item_list[index]["combobox_value"][j].set(i.get_one_value(j))
         GUI_item_list[index]["combobox_value"][j].grid(column=column_start+4, row=cpt)
     return cpt

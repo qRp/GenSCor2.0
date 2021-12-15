@@ -1,7 +1,7 @@
 Verifier la fonction compare pour gerer le typage des données
-Vérifier que le fichier n'existe pas déjà pour la fonction export
 
+Gerer les CNV :
+Ajout d'un attribut TYPE de variant qui est a completer pour chaque regle et pour chaque fihcier.
+On peut donc charger deux liste de variants en même temps s'ils ne sont pas du même type.
 
-Quand on change la colonne d'interet, mettre à jour la liste des données possibles dans le champs value et ne pas recalculer
-creer le non visuel
-bouton ajouter ligne
+gerer les conflits de header : voir dans le code les commentaires
