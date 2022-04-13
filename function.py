@@ -4,6 +4,7 @@ import tkinter
 import shutil
 import tkinter.ttk
 import tkinter.filedialog
+import tkinter.messagebox
 import datetime
 from Rules import *
 from Variant import *
@@ -235,6 +236,13 @@ def write_rules(file_path):
         f.write(rule_json)
     f.write('\n]}')
 
+def alert(titre, message, type='info'):
+    if type not in ('error', 'warning', 'info'):
+        raise ValueError('Unsupported alert kind.')
+
+    show_method = getattr(tkinter.messagebox, 'show{}'.format(type))
+    show_method(titre, message)
+
 #loading rules from file
 def load_rules(file_path, mode="classic"):
     global rules_list, header_list, Score_name
@@ -409,14 +417,17 @@ def launch_parameters():
 
 #create a rule
 def create_rule():
-    global rules_list
-    new_rule=Rules()
-    rules_list.append(new_rule)
-    # remove everything on the GUI
-    for i in (rules_frame.winfo_children()):
-        i.destroy()
-    #Updating the GUI, we need to destroy the button may be duplicate otherwise
-    print_GUI_rules()
+    global rules_list, variants_list
+    if len(variants_list) == 0:
+        alert("No data","Vous devez d'abord charger des données avant de créer des règles.", "error")
+    else:
+        new_rule=Rules()
+        rules_list.append(new_rule)
+        # remove everything on the GUI
+        for i in (rules_frame.winfo_children()):
+            i.destroy()
+        #Updating the GUI, we need to destroy the button may be duplicate otherwise
+        print_GUI_rules()
 
 #copy and paste a rule.
 def dupliquate_rule(rule):
