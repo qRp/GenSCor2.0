@@ -9,7 +9,7 @@ class Variant:
             self.Score = [""]
         else:
             self.Score= score
-        is type is None:
+        if type is None:
             self.Type = "UKN"
         else:
             self.Type=type
