@@ -546,6 +546,9 @@ def list_possible_values(index):
 def print_GUI_rules():
     global rules_list,GUI_var_list, GUI_item_list
     column_start = 3
+    # We start by removing everything
+    for i in (rules_frame.winfo_children()):
+        i.destroy()
     #initialisation de la liste de dictionnaire ou sont stockés les boutons
     GUI_var_list = [dict() for x in range(len(rules_list))]
     GUI_item_list = [dict() for x in range(len(rules_list))]
