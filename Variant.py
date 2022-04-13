@@ -1,6 +1,6 @@
 class Variant:
     #Variants are defined by attributs, it's the data we load from a tsv file, and by a score which we calculate.
-    def __init__(self, attributs_list=None, score=None):
+    def __init__(self, attributs_list=None, score=None, type=None):
         if attributs_list is None:
             self.Attributs = [""]
         else:
@@ -9,6 +9,10 @@ class Variant:
             self.Score = [""]
         else:
             self.Score= score
+        is type is None:
+            self.Type = "UKN"
+        else:
+            self.Type=type
 
     #Set the list of attributs
     def set_Attributs(self, attributs_list):
@@ -17,6 +21,14 @@ class Variant:
     #Set the score
     def set_Score(self, score):
         self.Score=score
+
+    #Set the type
+    def set_Type(self, type):
+        self.Type=type
+
+    #return the type
+    def get_Type(self):
+        return self.Type
 
     #return the score
     def get_Score(self):
