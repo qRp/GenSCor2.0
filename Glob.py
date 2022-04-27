@@ -1,5 +1,6 @@
 import datetime
 import tkinter
+from Lang import *
 
 #the list of the rules objects
 rules_list=[]
