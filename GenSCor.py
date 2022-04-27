@@ -10,7 +10,6 @@ from Glob import *
 import re
 import json
 #todo changer les imports pour eviter les wildcards
-lang="fr"
 #create Menu
 menubar = Menu(super_window)
 filemenu = Menu(menubar, tearoff=0)
