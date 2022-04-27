@@ -9,6 +9,7 @@ import datetime
 from Rules import *
 from Variant import *
 from Glob import *
+from Lang import *
 import json
 
 #Calculate the score for all the variants with every rules
@@ -401,12 +402,35 @@ def launch_automode():
     update_GUI_no_visual()
     automode_windows.mainloop()
 
+
+#launch the parameters windows
 def launch_parameters():
+    # update the parameters
+    def update_parameters():
+        value=str(var1.get())
+        print(var1.get())
+        print(value)
+        alert("parameter", "changement de parametre :  est maintenant à " +value+" !", "warning")
+
     #Window creation and resizing
     parameters_windows=tkinter.Tk()
     parameters_windows.title('Parameters')
     parameters_windows.geometry('310x110')
     #check box windowing
+
+    def print_selection():
+        print(str(var1.get()))
+
+    try :
+        var1
+    except NameError :
+        var1 = tkinter.IntVar()
+    c1 = tkinter.Checkbutton(parameters_windows, text='Python', variable=var1, onvalue=1, offvalue=0,
+                             command=print_selection)
+    c1.pack()
+    #checkbox_windowing = tkinter.Checkbutton(parameters_windows, text='Mode fénétré',
+     #                                        variable=fenetre, onvalue=1, offvalue=2, command=update_parameters)
+    #checkbox_windowing.pack()
     #label
     #checkbox
     #alert check box size

@@ -13,7 +13,7 @@ GUI_var_list=[]
 GUI_item_list=[]
 lasttime=datetime.datetime.strptime('22/11/10', '%d/%m/%y')
 cool_down=10
-Score_name="Score"
+Score_name=L["Score"][lang]
 
 #redefine scrolling region of the upper part when the windows is resized
 def myfunction_rules(event):

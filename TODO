@@ -1,7 +1,11 @@
 Verifier la fonction compare pour gerer le typage des données
 
+créer la fenetre de parametrage ++
+
+
+
 Gerer les CNV :
 Ajout d'un attribut TYPE de variant qui est a completer pour chaque regle et pour chaque fihcier.
 On peut donc charger deux liste de variants en même temps s'ils ne sont pas du même type.
-
+=> voir avec les utilisateurs la façon de présenter : fusionner tous les variants dans un seul fichier ou garder deux ensembles data/ ruleset distincts
 gerer les conflits de header : voir dans le code les commentaires

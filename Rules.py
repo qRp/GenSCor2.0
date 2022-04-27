@@ -131,7 +131,7 @@ class Rules:
 
     #change only one value at the specified index. Used for the GUI.
     def set_one_value(self,value,i):
-        print("set one value" + str(value) + str(i))
+        print(L["set one value"][lang] + str(value) + str(i))
         self.describe()
         # simple case : we are changing one value
         try:
@@ -158,7 +158,7 @@ class Rules:
 
     #print everything about the rule. Used for debug purposes.
     def describe(self):
-        print("L'instance de l'objet Rule "+str(self)+" est composé de :")
+        print("The instance of the 'Rule' object "+str(self)+" contains :")
         print(self.get_status() +"  "+ self.get_sens() +"  "+ str(self.get_score_val()))
         print(self.get_column() + self.get_text_column() + self.get_operator() + self.get_value())
 
