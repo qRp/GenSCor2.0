@@ -2,8 +2,13 @@ Verifier la fonction compare pour gerer le typage des données
 
 créer la fenetre de parametrage ++
 
+Finir les langues dans les fonctions
 
+BUG : changement de données avec des règles active : encapsuler la fonction dans un try et gérer les cas :
+soit on annule
+soit on efface les règles actives
 
+BUG : le calcul du score commence au premier chifffre taper et ne se remet pas à jour si on en tape d'autre
 Gerer les CNV :
 Ajout d'un attribut TYPE de variant qui est a completer pour chaque regle et pour chaque fihcier.
 On peut donc charger deux liste de variants en même temps s'ils ne sont pas du même type.

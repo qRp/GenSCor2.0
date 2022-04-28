@@ -604,6 +604,12 @@ def print_rule(i,index,cpt, column_start):
         sens_optionmenu.configure(style_actif)
         text_label2.configure(style_actif)
         text_label3.configure(style_actif)
+        for j in range(len(i.get_column())):
+            GUI_var_list[index]["button_dup"][j].configure(style_actif)
+            GUI_var_list[index]["button_sup"][j].configure(style_actif)
+            GUI_item_list[index]["operator_optionmenu"][j].configure(style_actif)
+            GUI_item_list[index]["column_optionmenu"][j].configure(style_actif)
+
 
     def updated_status(i):
         if i.get_status() == "on":
@@ -644,15 +650,18 @@ def print_rule(i,index,cpt, column_start):
         score_all()
         i.describe()
 
-    def updated_value(event, i, index, j):
+    def updated_value(i, index, j):
         print("Update value !")
+        print(i)
+        print(index)
+        print(j)
         i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
         print(GUI_var_list[index]["value"][j].get())
         score_all()
         i.describe()
 
     #creation du bouton Mute
-    status_button = tkinter.Button(rules_frame, text="Mute", command=lambda i=i, index=index: updated_status(i,index))
+    status_button = tkinter.Button(rules_frame, text="Mute", command=lambda i=i: updated_status(i))
     if i.get_status() == "on":
         style_actif=style_on
     else:
@@ -706,6 +715,8 @@ def print_rule(i,index,cpt, column_start):
     GUI_var_list[index]["operator"] = {}
     GUI_var_list[index]["value"] = {}
     GUI_item_list[index]["combobox_value"]={}
+    GUI_item_list[index]["column_optionmenu"]={}
+    GUI_item_list[index]["operator_optionmenu"]={}
     GUI_var_list[index]["button_dup"] = {}
     GUI_var_list[index]["button_sup"] = {}
     for j in range(len(i.get_column())):
@@ -724,32 +735,51 @@ def print_rule(i,index,cpt, column_start):
         column_var = tkinter.StringVar()
         GUI_var_list[index]["column"][j] = column_var
         GUI_var_list[index]["column"][j].set(header_list[int(i.get_one_column(j))])
-        column_optionmenu = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["column"][j],*header_list,
+        GUI_item_list[index]["column_optionmenu"][j] = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["column"][j],*header_list,
                                                command= lambda new_value, index=index, i=i, j=j: updated_column(new_value, i,index, j))
-        column_optionmenu.grid(column=column_start+2, row=cpt)
+        GUI_item_list[index]["column_optionmenu"][j].grid(column=column_start+2, row=cpt)
+        GUI_item_list[index]["column_optionmenu"][j].configure(style_actif)
 
         #affichage des optionmenu colonnes
         operator_var = tkinter.StringVar()
         GUI_var_list[index]["operator"][j] = operator_var
         GUI_var_list[index]["operator"][j].set(i.get_one_operator(j))
         operator_values=["=", "!=", "<", "<=", ">", ">=", "match", "contain", "don't contain"]
-        operator_optionmenu = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["operator"][j],*operator_values,
+        GUI_item_list[index]["operator_optionmenu"][j] = tkinter.OptionMenu(rules_frame, GUI_var_list[index]["operator"][j],*operator_values,
                                                command= lambda new_value, index=index, i=i, j=j: updated_operator(i,index, j))
-        operator_optionmenu.grid(column=column_start+3, row=cpt)
+        GUI_item_list[index]["operator_optionmenu"][j].grid(column=column_start+3, row=cpt)
+        GUI_item_list[index]["operator_optionmenu"][j].configure(style_actif)
         #value combobox
         value_var=tkinter.StringVar()
         GUI_var_list[index]["value"][j] = value_var
-        GUI_item_list[index]["combobox_value"][j]=tkinter.ttk.Combobox(rules_frame, textvariable=GUI_var_list[index]["value"][j])
+
+
+
+        def check_value(new_value, i=i, index=index, j=j):
+            updated_value(i, index, j)
+            return True  #accepts anything for now.
+
+        #combobox = ttk.Combobox(root, value=('test', 'test1', 'test2'),
+        #                        validate='focusout',
+        #                        validatecommand=(root.register(check_okay), '%P'))
+        #combobox.grid(row=row, column=1)
+
+        #combobox.bind('<Return>', lambda event, entry=combobox, text=text:
+        #                            update(entry.get(), entry=text))
+        #combobox.bind('<<ComboboxSelected>>', lambda event, entry=combobox, text=text:
+        # update(entry.get(), entry=text))
+
+
+
+
+        GUI_item_list[index]["combobox_value"][j]=tkinter.ttk.Combobox(rules_frame,
+                                                textvariable=GUI_var_list[index]["value"][j], validate='focusout',
+                                                validatecommand=(rules_frame.register(check_value), '%P'))
         GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
+        GUI_item_list[index]["combobox_value"][j].bind('<Return>',
+                                                       lambda event, i=i, index=index, j=j : updated_value(i, index, j))
         GUI_item_list[index]["combobox_value"][j].bind("<<ComboboxSelected>>",
-                                                       lambda event, i=i, index=index, j=j : updated_value(event, i,
-                                                                                                           index, j))
-        GUI_item_list[index]["combobox_value"][j].bind("<<Key Press>>",
-                                                       lambda event, i=i, index=index, j=j: updated_value(event, i,
-                                                                                                          index, j))
-        GUI_item_list[index]["combobox_value"][j].bind("<<Focus Out>>",
-                                                       lambda event, i=i, index=index, j=j: updated_value(event, i,
-                                                                                                          index, j))
+                                                       lambda event, i=i, index=index, j=j: updated_value(i, index, j))
         GUI_item_list[index]["combobox_value"][j].set(i.get_one_value(j))
         GUI_item_list[index]["combobox_value"][j].grid(column=column_start+4, row=cpt)
     return cpt

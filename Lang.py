@@ -7,7 +7,8 @@ L={
     "Parametres":{"en": "Parameters", "fr":"Paramètres"},
     "Quit":{"en": "Quit", "fr":"Quitter"},
     "File":{"en": "File", "fr":"Fichier"},
-    "Score":{"en": "Score", "fr":"Score"}
+    "Score":{"en": "Score", "fr":"Score"},
+    "set one value":{"en": "set one value", "fr":"changer une valeur"}
 
 
 
