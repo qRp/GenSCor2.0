@@ -175,12 +175,17 @@ def header_update():
         text_column_list=rule.get_text_column()
         for i in range(len(text_column_list)):
             text_column=rule.get_one_text_column(i)
-            index=header_list.index(text_column)
-            rule.set_one_column(index, i)
+            try :
+                index=header_list.index(text_column)
+                rule.set_one_column(index, i)
+                return True
+            except ValueError :
+                print("problème de correspondance")
+                return False
 
 #load data from file
 def load_data(file_path, mode="classic"):
-    global variants_list, header_list
+    global variants_list, header_list, rules_list
     #reset the variants_list
     variants_list=[]
     #opening and reading the file
@@ -188,13 +193,23 @@ def load_data(file_path, mode="classic"):
     lines = f.readlines()
     #if there is a header
     header_is_set=False
+    header_is_same=True
     for line in lines:
         data_line = line.split("\t")
         #updating the header and not putting it into the variants list
         if header_is_set == False:
             header_list=data_line
-            header_update()
+            header_is_same=header_update()
             header_is_set=True
+        elif header_is_same == False : #if at least one rule is not matching the new header, we reset the rules
+            save_return = tkinter.messagebox.askyesno(title="Sauvegarde des règles ?",
+                                                message="Les entêtes ne correspondent pas, les règles actives vont être supprimées. Voulez vous les enregistrer ? ")
+            if save_return: #if yes, we save the old rules
+                prewrite_rules()
+            rules_list=[] #in any case, we empty the ruleset...
+            header_is_same=True #... and update the var...
+            print_GUI_rules() #... and reset the windows
+
         else :
             #if it is not a header line, adding to the list of variants
             variants_list.append(Variant(data_line))
@@ -630,7 +645,7 @@ def print_rule(i,index,cpt, column_start):
     def updated_score_val(value, rule):
         print("Update score val")
         rule.set_score_val(value.get())
-        score_all()
+        score_all(True)
         rule.describe()
 
     def updated_column(new_value, i, index, j):
