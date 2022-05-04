@@ -2,6 +2,7 @@ import os.path
 import re
 import tkinter
 import shutil
+import threading
 import tkinter.ttk
 import tkinter.filedialog
 import tkinter.messagebox
@@ -11,30 +12,98 @@ from Variant import *
 from Glob import *
 from Lang import *
 import json
+import time
+
+def reset_timer_score():
+    print("reset !")
+    second=tkinter.StringVar()
+    second.set(10)
+    while int(second.get()) > -1 :
+        time.sleep(1)
+        print(int(second.get()))
+        if(int(second.get()) ==0):
+            score_all(True)
+        temp=int(second.get())
+        second.set(temp-1)
 
 #Calculate the score for all the variants with every rules
-def score_all(force=False):
-    global lasttime, rules_list, variants_list, cool_down
-    print("Début score")
-    start=datetime.datetime.now()
-    print(force)
-    print("Pre Scoring")
-    if (start-lasttime).total_seconds() > cool_down or force==True:
-        lasttime=start
-        print(force)
-        print("Scoring")
-        #for each variants in the list, we reset the score
-        for i in variants_list:
-            i.set_Score(0)
-        #for each rule in the list
-        for i in rules_list:
-            #if the rule is active, we use it on every variants
-            if i.get_status() == "on":
-                for j in variants_list:
-                    score_it(i,j)
+#def score_all(force=False):
+#    global lasttime, rules_list, variants_list, cool_down
+#    print("Début score")
+#    start=datetime.datetime.now()
+#    if (start-lasttime).total_seconds() > cool_down or force==True:
+#        lasttime=start
+#        print(force)
+#        print("Scoring")
+#        #for each variants in the list, we reset the score
+#        for i in variants_list:
+#            i.set_Score(0)
+#        #for each rule in the list
+#        for i in rules_list:
+ #           #if the rule is active, we use it on every variants
+ #           if i.get_status() == "on":
+ #               for j in variants_list:
+ #                   score_it(i,j)
+#        #actualising the GUI
+#        sort_variant_list()
+#        print_GUI_variants()
+
+
+# Check if score is done in 1 sec (1000 ms)
+def check_score_in_a_second():
+    global score_thread
+    print("check in a sec")
+    print(redo)
+    main_window.after(1000, check_if_score_is_done)
+
+#check if the thread is finished, and relaunch it if needed
+def check_if_score_is_done():
+    global redo, score_thread
+    print("check if done")
+    print(redo)
+    #if the thread is finished, reset it
+    if not score_thread.is_alive():
+        score_thread=threading.Thread(target=score_all) #reset thread for futur use
         #actualising the GUI
-        sort_variant_list()
         print_GUI_variants()
+        #if redo is check, relaunch the thread
+        if redo == 1 :
+            redo=0
+            pre_check_score()
+    #if the thread is still active, recheck later
+    else :
+        check_score_in_a_second()
+
+
+#launch score if not already launched, set relaunching
+def pre_check_score():
+    global redo, score_thread
+    print("pre check")
+    print(redo)
+    if not score_thread.is_alive():
+        score_thread.start()
+        check_score_in_a_second()
+    else:
+        redo=1
+
+
+#Calculate the score for all the variants with every rules
+def score_all():
+    print("score")
+    print(redo)
+    for i in variants_list:
+        i.set_Score(0)
+        #for each rule in the list
+    for i in rules_list:
+    # if the rule is active, we use it on every variants
+        if i.get_status() == "on":
+            for j in variants_list:
+                score_it(i, j)
+            #actualising the GUI
+    sort_variant_list()
+
+
+score_thread = threading.Thread(target=score_all)
 
 def sort_variant_list():
     global variants_list
@@ -214,7 +283,7 @@ def load_data(file_path, mode="classic"):
             #if it is not a header line, adding to the list of variants
             variants_list.append(Variant(data_line))
     if mode == "classic":
-        score_all()
+        pre_check_score()
 
 #writing data into file
 def export_data(file_path):
@@ -299,7 +368,8 @@ def load_rules(file_path, mode="classic"):
     #    pass
     if mode=="classic":
         print_GUI_rules()
-        score_all()
+        pre_check_score()
+        #score_all()
         print_GUI_variants()
 
 #function triggered before loading rules from file. Ask the user where is the file to load.
@@ -378,7 +448,7 @@ def launch_automode():
                 print(rule_file+"_"+data_file_out)
                 load_data(data_file_out)
                 load_rules(rule_file)
-                score_all(True)
+                pre_check_score()
                 export_data(data_file_out)
 
     #all the items of the GUI
@@ -599,7 +669,7 @@ def print_GUI_rules():
         index+=1
     # Create button for test purposes
     My_button1 = tkinter.Button(rules_frame, text="Describe_all", command=print_all)
-    My_button2 = tkinter.Button(rules_frame, text="Score_it", command=lambda : score_all(True))
+    My_button2 = tkinter.Button(rules_frame, text="Score_it", command=lambda : pre_check_score())
     My_button1.grid(column=column_start+2, row=cpt+1)
     My_button2.grid(column=column_start+1, row=cpt+1)
     #Create button for adding a new rule
@@ -639,13 +709,14 @@ def print_rule(i,index,cpt, column_start):
     def updated_sens(i,index):
         print("Update sens")
         i.set_sens(GUI_var_list[index]["sens"].get())
-        score_all()
+        pre_check_score()
         i.describe()
 
     def updated_score_val(value, rule):
         print("Update score val")
         rule.set_score_val(value.get())
-        score_all(True)
+        pre_check_score()
+        #reset_timer_score()
         rule.describe()
 
     def updated_column(new_value, i, index, j):
@@ -656,13 +727,13 @@ def print_rule(i,index,cpt, column_start):
         GUI_item_list[index]["combobox_value"][j]['values'] = list_possible_values(int(i.get_one_column(j)))
         GUI_item_list[index]["combobox_value"][j].set(GUI_item_list[index]["combobox_value"][j]['values'][0])
         i.set_one_value(GUI_item_list[index]["combobox_value"][j]['values'][0], j)
-        score_all()
+        pre_check_score()
         i.describe()
 
     def updated_operator(i, index, j):
         print("Update operator !")
         i.set_one_operator(GUI_var_list[index]["operator"][int(j)].get(),j)
-        score_all()
+        pre_check_score()
         i.describe()
 
     def updated_value(i, index, j):
@@ -672,7 +743,7 @@ def print_rule(i,index,cpt, column_start):
         print(j)
         i.set_one_value(GUI_var_list[index]["value"][j].get(),j)
         print(GUI_var_list[index]["value"][j].get())
-        score_all()
+        pre_check_score()
         i.describe()
 
     #creation du bouton Mute
