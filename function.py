@@ -14,18 +14,18 @@ from Lang import *
 import json
 import time
 
-def reset_timer_score():
-    print("reset !")
-    second=tkinter.StringVar()
-    second.set(10)
-    while int(second.get()) > -1 :
-        time.sleep(1)
-        print(int(second.get()))
-        if(int(second.get()) ==0):
-            score_all(True)
-        temp=int(second.get())
-        second.set(temp-1)
-
+#def reset_timer_score():
+#    print("reset !")
+#    second=tkinter.StringVar()
+#    second.set(10)
+#    while int(second.get()) > -1 :
+#        time.sleep(1)
+##        print(int(second.get()))
+#        if(int(second.get()) ==0):
+#            score_all(True)
+#        temp=int(second.get())
+#        second.set(temp-1)
+#
 #Calculate the score for all the variants with every rules
 #def score_all(force=False):
 #    global lasttime, rules_list, variants_list, cool_down
@@ -51,10 +51,10 @@ def reset_timer_score():
 
 # Check if score is done in 1 sec (1000 ms)
 def check_score_in_a_second():
-    global score_thread
+    global score_thread, check_score_time
     print("check in a sec")
     print(redo)
-    main_window.after(1000, check_if_score_is_done)
+    main_window.after(check_score_time, check_if_score_is_done)
 
 #check if the thread is finished, and relaunch it if needed
 def check_if_score_is_done():
@@ -77,14 +77,20 @@ def check_if_score_is_done():
 
 #launch score if not already launched, set relaunching
 def pre_check_score():
-    global redo, score_thread
+    global redo, score_thread, check_score_time
     print("pre check")
     print(redo)
-    if not score_thread.is_alive():
-        score_thread.start()
-        check_score_in_a_second()
-    else:
-        redo=1
+    try :
+        if not score_thread.is_alive():
+            score_thread.start()
+            check_score_in_a_second()
+        else:
+            redo=1
+    except RuntimeError :
+        #will be raised if the user trigger it just between the end of the thread
+        # and the next periodic check
+        time.sleep(check_score_time/1000)
+
 
 
 #Calculate the score for all the variants with every rules
@@ -102,9 +108,10 @@ def score_all():
             #actualising the GUI
     sort_variant_list()
 
-
+#init of the thread object, need to be after the function
 score_thread = threading.Thread(target=score_all)
 
+#sort the variant list
 def sort_variant_list():
     global variants_list
     variants_list.sort(key = lambda x: x.Score, reverse=True)
@@ -448,7 +455,7 @@ def launch_automode():
                 print(rule_file+"_"+data_file_out)
                 load_data(data_file_out)
                 load_rules(rule_file)
-                pre_check_score()
+                score_all()
                 export_data(data_file_out)
 
     #all the items of the GUI
@@ -486,7 +493,6 @@ def launch_automode():
     automode_windows.geometry('310x110')
     update_GUI_no_visual()
     automode_windows.mainloop()
-
 
 #launch the parameters windows
 def launch_parameters():
