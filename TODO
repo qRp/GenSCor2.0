@@ -7,6 +7,8 @@ scoring auto
 
 Finir les langues dans les fonctions
 
+améliorer fenetre no visual :
+permettre de supprimer des fichiers, par défaut ajouter les fichiers  à la liste
 
 Gerer les CNV :
 Ajout d'un attribut TYPE de variant qui est a completer pour chaque regle et pour chaque fihcier.

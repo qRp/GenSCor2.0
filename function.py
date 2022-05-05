@@ -457,6 +457,9 @@ def launch_automode():
                 load_rules(rule_file)
                 score_all()
                 export_data(data_file_out)
+        # creating the done label
+        done_label = tkinter.Label(automode_windows, text="Everything is done !")
+        done_label.grid(column=2, row=1)
 
     #all the items of the GUI
     def update_GUI_no_visual():
@@ -479,18 +482,18 @@ def launch_automode():
         for i in data_file_list :
             cpt+=1
             data_label=tkinter.Label(automode_windows, text=i)
-            data_label.grid(column=1, row=cpt)
+            data_label.grid(column=1, row=cpt+1)
         cpt=0
         #for each rules filepath selected, printing it in a label
         for i in rules_file_list :
             cpt+=1
             rule_label=tkinter.Label(automode_windows, text=i)
-            rule_label.grid(column=3, row=cpt)
+            rule_label.grid(column=3, row=cpt+1)
+
 
     #Window creation and resizing
     automode_windows=tkinter.Tk()
     automode_windows.title('Automode')
-    automode_windows.geometry('310x110')
     update_GUI_no_visual()
     automode_windows.mainloop()
 
