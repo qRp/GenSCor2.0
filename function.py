@@ -251,6 +251,8 @@ def quick_save(what, why):
         message="Les données vont être changées, voulez-vous exporter les données actuelles ? "
     elif(why=="new data rule"):
         message = "Les règles vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
+    elif (why == "new rules"):
+        message = "Les règles vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
 
     save_return = tkinter.messagebox.askyesno(title="Sauvegarde des "+what+" ?", message=message)
     if save_return:  # if yes, we save the old rules
@@ -378,19 +380,20 @@ def load_rules(file_path, mode="classic"):
 
 #function triggered before loading rules from file. Ask the user where is the file to load.
 def preload_rules():
-    #cas 1 ND R? Erreur : Load data first
-    #cas 2 D NR : LOAD ok
-    #cas 3 D R ; save rules first ?
-
-
-    file=tkinter.filedialog.askopenfilename(filetypes =[('Json Files', '*.json'),('All Files', '*')])
-    if file is not None and len(variants_list) !=0:
-        load_rules(file)
-    elif (len(variants_list) == 0):
+    global rules_list, variants_list
+    #if there is no data, error, data muste be loaded first
+    if(len(variants_list)==0):
         alert("No data", "Vous devez d'abord charger des données avant de créer des règles.", "error")
-        return 1
-    else :
-        return 1
+    #if there is data and no rules, just load rules
+    elif(len(rules_list)==0):
+        file=tkinter.filedialog.askopenfilename(filetypes =[('Json Files', '*.json'),('All Files', '*')])
+        load_rules(file)
+    #if there is already rules, ask to save them before reset, then load
+    else:
+        file = tkinter.filedialog.askopenfilename(filetypes=[('Json Files', '*.json'), ('All Files', '*')])
+        quick_save("rules", "new rules")
+        load_rules(file)
+
 
 #function triggered before loading variants from file, handle the different cases (data and rules absence or presence)
 def preload_data():

@@ -10,7 +10,7 @@ si charger des règles et déjà des règles, enregistrer ?
 Chargement de règles sur des données qui ne correspondent pas à revoir
 
 
-check what happen if ask load data file return 0
+gerer les cancel sur les askopenfilename !
 
 Finir les langues dans les fonctions
 
