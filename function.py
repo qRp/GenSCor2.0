@@ -247,9 +247,9 @@ def header_string_to_index(string):
 
 #triggered when there is a change in the rules or in the data, allow to quickly save the rules before loading new data / new rules
 def quick_save(what, why):
-    if(why=="data_change"):
-        message="Les données vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
-    elif(why=="rules_change"):
+    if(why=="new data"):
+        message="Les données vont être changées, voulez-vous exporter les données actuelles ? "
+    elif(why=="new data rule"):
         message = "Les règles vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
 
     save_return = tkinter.messagebox.askyesno(title="Sauvegarde des "+what+" ?", message=message)
@@ -277,11 +277,11 @@ def load_data(file_path, mode="classic"):
         if header_is_set == False:
             header_list=data_line
             header_is_set=True
-        elif header_is_same == False : #if at least one rule is not matching the new header, we reset the rules
-            quick_save("data","data_change")
-            rules_list=[] #in any case, we empty the ruleset...
-            header_is_same=True #... and update the var...
-            print_GUI_rules() #... and reset the windows
+#        elif header_is_same == False : #if at least one rule is not matching the new header, we reset the rules
+#            quick_save("data","data_change")
+#            rules_list=[] #in any case, we empty the ruleset...
+#            header_is_same=True #... and update the var...
+#            print_GUI_rules() #... and reset the windows
 
         else :
             #if it is not a header line, adding to the list of variants
@@ -420,12 +420,13 @@ def preload_data():
         compatibility=check_compatibility(filepath)
         print("data and rules")
         if( compatibility == 0):
-            print("ask export")
+            quick_save("data", "new data")
             load_data(filepath)
         else :
             print("ask export, ask save")
+            quick_save("data", "new data")
+            quick_save("rules", "new data rule")
             load_data(filepath)
-    # TODO check if header are compatible, launch load data accordingly
 
 # function triggered before loading variants from file. Ask the user where is the file to load.
 def ask_load_data_file():
