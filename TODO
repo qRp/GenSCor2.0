@@ -4,8 +4,17 @@ créer la fenetre de parametrage ++
 Langues
 fenetrage
 scoring auto
+ligne a sauter et séparateur
+
+si charger des règles et déjà des règles, enregistrer ?
+Chargement de règles sur des données qui ne correspondent pas à revoir
+
+
+check what happen if ask load data file return 0
 
 Finir les langues dans les fonctions
+
+
 
 améliorer fenetre no visual :
 permettre de supprimer des fichiers, par défaut ajouter les fichiers  à la liste
@@ -15,3 +24,6 @@ Ajout d'un attribut TYPE de variant qui est a completer pour chaque regle et pou
 On peut donc charger deux liste de variants en même temps s'ils ne sont pas du même type.
 => voir avec les utilisateurs la façon de présenter : fusionner tous les variants dans un seul fichier ou garder deux ensembles data/ ruleset distincts
 gerer les conflits de header : voir dans le code les commentaires
+gestion en onglets ?
+Si plus d'un onglets, alors afficher un préfixe "type" sur les colonnes
+Attention : suppose réécriture fonction load / save règles et variants

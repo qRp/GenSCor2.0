@@ -245,19 +245,20 @@ def header_string_to_index(string):
     print(header_list)
     return header_list.index(string)
 
-def header_update():
-    global rules_list
-    for rule in rules_list:
-        text_column_list=rule.get_text_column()
-        for i in range(len(text_column_list)):
-            text_column=rule.get_one_text_column(i)
-            try :
-                index=header_list.index(text_column)
-                rule.set_one_column(index, i)
-                return True
-            except ValueError :
-                print("problème de correspondance")
-                return False
+#triggered when there is a change in the rules or in the data, allow to quickly save the rules before loading new data / new rules
+def quick_save(what, why):
+    if(why=="data_change"):
+        message="Les données vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
+    elif(why=="rules_change"):
+        message = "Les règles vont être changées, les règles actives vont être supprimées. Voulez vous les enregistrer ? "
+
+    save_return = tkinter.messagebox.askyesno(title="Sauvegarde des "+what+" ?", message=message)
+    if save_return:  # if yes, we save the old rules
+        if what=="rules":
+            prewrite_rules()
+        elif what=="data":
+            preexport_data()
+
 
 #load data from file
 def load_data(file_path, mode="classic"):
@@ -275,13 +276,9 @@ def load_data(file_path, mode="classic"):
         #updating the header and not putting it into the variants list
         if header_is_set == False:
             header_list=data_line
-            header_is_same=header_update()
             header_is_set=True
         elif header_is_same == False : #if at least one rule is not matching the new header, we reset the rules
-            save_return = tkinter.messagebox.askyesno(title="Sauvegarde des règles ?",
-                                                message="Les entêtes ne correspondent pas, les règles actives vont être supprimées. Voulez vous les enregistrer ? ")
-            if save_return: #if yes, we save the old rules
-                prewrite_rules()
+            quick_save("data","data_change")
             rules_list=[] #in any case, we empty the ruleset...
             header_is_same=True #... and update the var...
             print_GUI_rules() #... and reset the windows
@@ -363,7 +360,7 @@ def load_rules(file_path, mode="classic"):
                     rule.set_one_column(header_list.index(jdict["rules"][i]["TextColumn"][index]), index)
                 except (ValueError):
                     print("Value error : "+jdict["rules"][i]["TextColumn"][index])
-                    #creer fenetre
+                    #creer fenetre TODO
                     #bouton 1 : supprimer la regle
                     #bouton 2 remplacer par une autre valeur
         else :
@@ -381,20 +378,88 @@ def load_rules(file_path, mode="classic"):
 
 #function triggered before loading rules from file. Ask the user where is the file to load.
 def preload_rules():
+    #cas 1 ND R? Erreur : Load data first
+    #cas 2 D NR : LOAD ok
+    #cas 3 D R ; save rules first ?
+
+
     file=tkinter.filedialog.askopenfilename(filetypes =[('Json Files', '*.json'),('All Files', '*')])
-    if file is not None:
+    if file is not None and len(variants_list) !=0:
         load_rules(file)
+    elif (len(variants_list) == 0):
+        alert("No data", "Vous devez d'abord charger des données avant de créer des règles.", "error")
+        return 1
     else :
         return 1
 
-#function triggered before loading variants from file. Ask the user where is the file to load.
+#function triggered before loading variants from file, handle the different cases (data and rules absence or presence)
 def preload_data():
-    global header_list
+    global header_list, variants_list, rules_list
+    #If no data nor rules are loaded
+    if( len(variants_list) == 0 and len(rules_list)==0):
+        #nothing special, just load data
+        print("no data no rules")
+        load_data(ask_load_data_file())
+    #if no data but rules
+    elif (len(variants_list) == 0 and len(rules_list) != 0):
+        #that's a bug case, should not happen, so we hard-reseting everything
+        variants_list=[]
+        rules_list=[]
+        print("no data rules !!!")
+        load_data(ask_load_data_file())
+    #if data but no rules
+    elif (len(variants_list) != 0 and len(rules_list) == 0):
+        #no scoring to do, so just reset and load new data
+        print("data no rules")
+        load_data(ask_load_data_file())
+    #if data and rules
+    elif (len(variants_list) != 0 and len(rules_list) != 0):
+        #if data aren't matching rules, ask export, ask save rules, reset and load
+        #if data are matching rules, ask export, reset and load ?
+        filepath=ask_load_data_file()
+        compatibility=check_compatibility(filepath)
+        print("data and rules")
+        if( compatibility == 0):
+            print("ask export")
+            load_data(filepath)
+        else :
+            print("ask export, ask save")
+            load_data(filepath)
+    # TODO check if header are compatible, launch load data accordingly
+
+# function triggered before loading variants from file. Ask the user where is the file to load.
+def ask_load_data_file():
     file=tkinter.filedialog.askopenfilename(filetypes=[('txt Files', '*.txt'),('tsv Files', '*.tsv'),('All Files', '*')])
     if file is not None:
-        load_data(file)
+        return file
     else:
         return 1
+
+#ceck if a new file contains the same data structure as the old one, return the number of differences
+def check_compatibility(file):
+    global rules_list
+    with open(file) as f:
+        firstline = f.readline().rstrip()
+        firstline_list=firstline.split("\t")
+        print(firstline)
+        print(firstline_list[0])
+        cpt=0
+        cpt_check=0
+        for rule in rules_list:
+            cpt=cpt+1
+            cpt_check = cpt_check + 1
+            text_column_list = rule.get_text_column()
+            rule.describe()
+            for i in range(len(text_column_list)):
+                text_column = rule.get_one_text_column(i)
+                print(text_column)
+                try:
+                    index = firstline_list.index(text_column)
+                except ValueError:
+                    cpt_check=cpt_check-1
+        print(str(cpt_check)+"/"+str(cpt))
+    return cpt-cpt_check
+
 
 #function triggered before writing rules from file. Ask the user where is the file to write into.
 def prewrite_rules():
