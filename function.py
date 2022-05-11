@@ -187,12 +187,12 @@ def compare(working_value, operator, value):
                 return False
 
         elif operator == "contain":
-            if str(working_value) in str(value):
+            if str(value) in str(working_value):
                 return True
             else:
                 return False
         elif operator == "don't contain":
-            if str(working_value) not in str(value):
+            if str(value) not in str(working_value):
                 return True
             else:
                 return False
@@ -268,7 +268,11 @@ def load_data(file_path, mode="classic"):
     #reset the variants_list
     variants_list=[]
     #opening and reading the file
-    f = open(file_path, "r")
+    try :
+        f = open(file_path, "r",  encoding='utf8')
+    except FileNotFoundError :
+        print("le fichier n'existe pas, abandon")
+        return 1
     lines = f.readlines()
     #if there is a header
     header_is_set=False
@@ -295,7 +299,7 @@ def load_data(file_path, mode="classic"):
 def export_data(file_path):
     global variants_list, header_list, Score_name
     #openning and writing the score for each variant
-    f = open(file_path, "w")
+    f = open(file_path, "w", encoding='utf8')
     print(header_list)
     f.write(Score_name+"\t")
     for i in header_list:
@@ -306,7 +310,7 @@ def export_data(file_path):
         #and writing every attributes for each variant
         for j in i.get_Attributs():
             f.write(j+"\t")
-        f.write("\n")
+    f.write("\n")
 
 #writing rules into file
 def write_rules(file_path):
@@ -342,11 +346,14 @@ def load_rules(file_path, mode="classic"):
     #openning and reading
     rules_list=[]
     #for each line, extract rule info. The expected format is json.
-    #try :
-    with open(file_path) as f:
-        jdict=json.load(f)
-        print(jdict)
-    size=len(jdict["rules"])
+    try :
+        with open(file_path) as f:
+            jdict=json.load(f)
+            print(jdict)
+        size=len(jdict["rules"])
+    except FileNotFoundError :
+        print("Le fichier n'existe pas, abandon")
+        return 1
     #if there is a header defined, we directly set the column index
     for i in range(size):
         rule=Rules(
@@ -484,8 +491,8 @@ def preexport_data():
 #launch the no visual mode for autoscoring multiples files
 def launch_automode():
     #list of filenames
-    data_file_list=()
-    rules_file_list=()
+    data_file_list=[]
+    rules_file_list=[]
     #nested function to update the list of filenames with a dialog box
     def select_data():
         nonlocal data_file_list
@@ -493,7 +500,8 @@ def launch_automode():
                                                   ,defaultextension=".tsv")
         #if there is file selected, we update the list
         if len(files)!=0:
-            data_file_list=files
+            for item in files:
+                data_file_list.append(item)
             #and we update the GUI to print the selected files
             update_GUI_no_visual()
         else:
@@ -505,7 +513,8 @@ def launch_automode():
                                                     defaultextension=".json")
         #if some files are selected
         if len(files)!=0:
-            rules_file_list=files
+            for item in files :
+                rules_file_list.append(item)
             #updating the GUI to print the selected filepath
             update_GUI_no_visual()
         else:
@@ -528,7 +537,17 @@ def launch_automode():
                 export_data(data_file_out)
         # creating the done label
         done_label = tkinter.Label(automode_windows, text="Everything is done !")
-        done_label.grid(column=2, row=1)
+        done_label.grid(column=3, row=1)
+
+    def pop_data(i):
+        print("pop data")
+        data_file_list.remove(i)
+        update_GUI_no_visual()
+
+    def pop_rule(i):
+        print("pop rule")
+        rules_file_list.remove(i)
+        update_GUI_no_visual()
 
     #all the items of the GUI
     def update_GUI_no_visual():
@@ -543,26 +562,31 @@ def launch_automode():
         select_data_button.grid(column=1, row=0)
         #gridding the score button only if there is rules AND data selected
         if len(rules_file_list) !=0 and len(data_file_list) !=0 :
-            score_all_button.grid(column=2, row=0)
+            score_all_button.grid(column=3, row=0)
         #gridding the last one
-        select_rules_button.grid(column=3, row=0)
-        cpt=0
+        select_rules_button.grid(column=4, row=0)
+        cpt=1
         #for each data filepath selected, printing it in a label
         for i in data_file_list :
             cpt+=1
             data_label=tkinter.Label(automode_windows, text=i)
-            data_label.grid(column=1, row=cpt+1)
-        cpt=0
+            data_label.grid(column=1, row=cpt)
+            data_delete=tkinter.Button(automode_windows, text="Sup", command=lambda i=i : pop_data(i))
+            data_delete.grid(column=2,row=cpt)
+        cpt=1
         #for each rules filepath selected, printing it in a label
         for i in rules_file_list :
             cpt+=1
             rule_label=tkinter.Label(automode_windows, text=i)
-            rule_label.grid(column=3, row=cpt+1)
+            rule_label.grid(column=3, row=cpt)
+            rule_delete = tkinter.Button(automode_windows, text="Sup", command=lambda i=i : pop_rule(i))
+            rule_delete.grid(column=5, row=cpt)
 
 
     #Window creation and resizing
     automode_windows=tkinter.Tk()
     automode_windows.title('Automode')
+    automode_windows.minsize(300,100)
     update_GUI_no_visual()
     automode_windows.mainloop()
 
@@ -782,6 +806,7 @@ def print_rule(i,index,cpt, column_start):
             i.set_status("on")
             style_actif=style_on
         update_GUI(style_actif)
+        pre_check_score()
         i.describe()
 
     def updated_sens(i,index):
