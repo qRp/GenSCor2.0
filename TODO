@@ -1,4 +1,5 @@
-Verifier la fonction compare pour gerer le typage des données
+Verifier la fonction compare pour gerer le typage des données et avertir l'utilisateur
+passer le background en rouge ?
 
 créer la fenetre de parametrage ++
 Langues
@@ -12,11 +13,7 @@ gerer les cancel sur les askopenfilename !
 
 Finir les langues dans les fonctions
 
-
-pourquoi l'export est une ligne sur deux ?
-Ou est le meilleur score, pourquoi i ln'est pas dans l'export ?
-pourquoi il  ya une différence entre les deux genscor ?
-
+ajouter compteur pour pas overwrite en automode
 
 
 Gerer les CNV :

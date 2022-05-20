@@ -19,6 +19,7 @@ cool_down=10
 Score_name=L["Score"][lang]
 redo=0
 check_score_time=1000
+must_score=1
 
 #redefine scrolling region of the upper part when the windows is resized
 def myfunction_rules(event):

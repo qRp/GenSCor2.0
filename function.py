@@ -77,34 +77,47 @@ def check_if_score_is_done():
 
 #launch score if not already launched, set relaunching
 def pre_check_score():
-    global redo, score_thread, check_score_time
+    global redo, score_thread, check_score_time, must_score
     print("pre check")
     print(redo)
-    try :
-        if not score_thread.is_alive():
-            score_thread.start()
-            check_score_in_a_second()
-        else:
-            redo=1
-    except RuntimeError :
-        #will be raised if the user trigger it just between the end of the thread
-        # and the next periodic check
-        time.sleep(check_score_time/1000)
+    if must_score :
+        try :
+            if not score_thread.is_alive() :
+                score_thread.start()
+                check_score_in_a_second()
+            else:
+                redo=1
+        except RuntimeError :
+            #will be raised if the user trigger it just between the end of the thread
+            # and the next periodic check
+            time.sleep(check_score_time/1000)
+    else :
+        print_GUI_variants()
+        return 1
 
 
 
 #Calculate the score for all the variants with every rules
 def score_all():
     print("score")
-    print(redo)
+    #print(redo)
     for i in variants_list:
         i.set_Score(0)
         #for each rule in the list
+    #print(len(variants_list))
     for i in rules_list:
     # if the rule is active, we use it on every variants
         if i.get_status() == "on":
             for j in variants_list:
-                score_it(i, j)
+                try :
+                    score_it(i, j)
+                except :
+                    print("erreur dans le score it")
+                    print (i)
+                    print(j)
+                    i.describe()
+                    j.describe()
+                    exit()
             #actualising the GUI
     sort_variant_list()
 
@@ -278,6 +291,7 @@ def load_data(file_path, mode="classic"):
     header_is_set=False
     header_is_same=True
     for line in lines:
+        line=line.replace('\n','')
         data_line = line.split("\t")
         #updating the header and not putting it into the variants list
         if header_is_set == False:
@@ -300,7 +314,7 @@ def export_data(file_path):
     global variants_list, header_list, Score_name
     #openning and writing the score for each variant
     f = open(file_path, "w", encoding='utf8')
-    print(header_list)
+    #print(header_list)
     f.write(Score_name+"\t")
     for i in header_list:
         f.write(str(i)+"\t")
@@ -310,7 +324,7 @@ def export_data(file_path):
         #and writing every attributes for each variant
         for j in i.get_Attributs():
             f.write(j+"\t")
-    f.write("\n")
+        f.write("\n")
 
 #writing rules into file
 def write_rules(file_path):
@@ -452,8 +466,8 @@ def check_compatibility(file):
     with open(file) as f:
         firstline = f.readline().rstrip()
         firstline_list=firstline.split("\t")
-        print(firstline)
-        print(firstline_list[0])
+        #print(firstline)
+        #print(firstline_list[0])
         cpt=0
         cpt_check=0
         for rule in rules_list:
@@ -463,12 +477,12 @@ def check_compatibility(file):
             rule.describe()
             for i in range(len(text_column_list)):
                 text_column = rule.get_one_text_column(i)
-                print(text_column)
+                #print(text_column)
                 try:
                     index = firstline_list.index(text_column)
                 except ValueError:
                     cpt_check=cpt_check-1
-        print(str(cpt_check)+"/"+str(cpt))
+        #print(str(cpt_check)+"/"+str(cpt))
     return cpt-cpt_check
 
 
@@ -531,13 +545,15 @@ def launch_automode():
             shutil.copyfile(data_file_base, data_file_out)
             for rule_file in rules_file_list:
                 print(rule_file+"_"+data_file_out)
-                load_data(data_file_out)
-                load_rules(rule_file)
+                load_data(data_file_out, "automode")
+                load_rules(rule_file, "automode")
                 score_all()
                 export_data(data_file_out)
         # creating the done label
         done_label = tkinter.Label(automode_windows, text="Everything is done !")
         done_label.grid(column=3, row=1)
+        variants_list=[]
+        rules_list=[]
 
     def pop_data(i):
         print("pop data")
@@ -654,7 +670,8 @@ def dupliquate_rule(rule):
         #creating the daughter rule with the same infos
         new_rule = Rules(status, operator, value, sens, score_val, text_column, column)
         #adding the rule to the list
-        rules_list.append(new_rule)
+        index=rules_list.index(rule)
+        rules_list.insert(index, new_rule)
         # remove everything on the GUI
         for i in (rules_frame.winfo_children()):
             i.destroy()
@@ -782,6 +799,7 @@ def print_rule(i,index,cpt, column_start):
     global GUI_var_list, header_list, GUI_item_list
     style_on = {'bg': '#CEE5D0', 'font':"-overstrike 0"}
     style_off = {'bg': 'grey', 'font': "-overstrike 1"}
+    i.describe()
 
     def update_GUI(style_actif):
         dupliquer_button.configure(style_actif)
